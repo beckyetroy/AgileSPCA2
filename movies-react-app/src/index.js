@@ -47,6 +47,7 @@ const App = () => {
               <Route element={<ProtectedRoutes />}>
                 <Route path="/movies/favorites" element={<FavoriteMoviesPage />} />
                 <Route path="/movies/mustwatch" element={<MustWatchMoviesPage />} />
+                <Route path="/reviews/form" element={ <AddMovieReviewPage /> } />
               </Route>
 
               <Route path="/movies/:id" element={<MoviePage />} />
@@ -58,7 +59,6 @@ const App = () => {
               <Route path="/movies/trending/today" element={<TrendingMoviesPageDay />} />
               <Route path="/" element={<HomePage/>} />
               <Route path="*" element={ <Navigate to="/" /> } />
-              <Route path="/reviews/form" element={ <AddMovieReviewPage /> } />
             </Routes>
           </Suspense>
           </MoviesContextProvider>
