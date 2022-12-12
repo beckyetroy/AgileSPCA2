@@ -7,6 +7,7 @@ import MoviesContextProvider from "./contexts/moviesContext";
 import { TrendingMoviesPageWeek, TrendingMoviesPageDay} from "./pages/trendingMoviesPage";
 import SiteHeader from './components/siteHeader';
 import LoginPage from "./pages/logInPage";
+import SignUpPage from "./pages/signUpPage";
 import AuthProvider from "./contexts/authContext";
 import ProtectedRoutes from "./contexts/protectedRoutes";
 const HomePage = lazy(() => import("./pages/homePage"));
@@ -42,6 +43,7 @@ const App = () => {
           <Suspense fallback={<h1>Loading page</h1>}>
             <Routes>
               <Route path="/login" element={ <LoginPage /> } />
+              <Route path="/signup" element={ <SignUpPage /> } />
               <Route path="/reviews/:id" element={ <MovieReviewPage /> } />
 
               <Route element={<ProtectedRoutes />}>
