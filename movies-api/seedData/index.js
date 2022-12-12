@@ -45,7 +45,7 @@ export async function loadMovies() {
     }
   }
 
-if (process.env.SEED_DB == 'true') {
+if (process.env.SEED_DB == 'True') {
   loadUsers();
   loadGenres();
   loadMovies();
