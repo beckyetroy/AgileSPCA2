@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { getUpcomingMovies } from "../api/tmdb-api";
+import { fetchUpcomingMovies } from '../api/movie-api';
 import { useQuery } from 'react-query';
 import Spinner from '../components/spinner';
 import AddToMustWatch from "../components/cardIcons/addToMustWatch";
@@ -7,7 +7,7 @@ const PageTemplate = lazy(() => import('../components/templateMovieListPage'));
 
 const UpcomingMoviesPage = (props) => {
 
-  const {  data, error, isLoading, isError }  = useQuery('discoverUpcoming', getUpcomingMovies)
+  const {  data, error, isLoading, isError }  = useQuery('discoverUpcoming', fetchUpcomingMovies)
 
   if (isLoading) {
     return (

@@ -1,15 +1,15 @@
 import React from "react";
 import MovieHeader from "../headerMovie";
 import Grid from "@mui/material/Grid";
-import { getMovieImages } from "../../api/tmdb-api";
+import { fetchMovieImages } from "../../api/movie-api";
 import { useQuery } from "react-query";
 import Spinner from '../spinner';
 import Carousel from 'react-material-ui-carousel';
 
 const TemplateMoviePage = ({ movie, children }) => {
   const { data , error, isLoading, isError } = useQuery(
-    ["images", { id: movie.id }],
-    getMovieImages
+    "images", () =>
+    fetchMovieImages(movie.id)
   );
 
   if (isLoading) {

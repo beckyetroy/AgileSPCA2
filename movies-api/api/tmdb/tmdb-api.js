@@ -1,4 +1,6 @@
-  export const getMovies = () => {
+import fetch from 'node-fetch';
+
+export const getMovies = () => {
     return fetch(
       `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.REACT_APP_TMDB_KEY}&language=en-US&include_adult=false&include_video=false&page=1`
     ).then((response) => {
@@ -12,10 +14,7 @@
     });
   };
   
-  export const getMovie = (args) => {
-    // console.log(args)
-    const [, idPart] = args.queryKey;
-    const { id } = idPart;
+  export const getMovie = (id) => {
     return fetch(
       `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.REACT_APP_TMDB_KEY}`
     ).then((response) => {
@@ -45,9 +44,7 @@
    });
   };
   
-  export const getMovieImages = ({ queryKey }) => {
-    const [, idPart] = queryKey;
-    const { id } = idPart;
+  export const getMovieImages = (id) => {
     return fetch(
       `https://api.themoviedb.org/3/movie/${id}/images?api_key=${process.env.REACT_APP_TMDB_KEY}`
     ).then( (response) => {
@@ -73,7 +70,7 @@
       });
   };
 
-  export const getUpcomingMovies = (id) => {
+  export const getUpcomingMovies = () => {
     return fetch(
       `https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.REACT_APP_TMDB_KEY}`
     ).then( (response) => {
@@ -103,9 +100,7 @@
    });
   };
 
-  export const getMovieCredits = (args) => {
-    const [, idPart] = args.queryKey;
-    const { id } = idPart;
+  export const getMovieCredits = (id) => {
     return fetch(
       `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${process.env.REACT_APP_TMDB_KEY}`
     )
@@ -115,31 +110,9 @@
       });
   };
 
-  export const getPersonDetails = (args) => {
-    const [, idPart] = args.queryKey;
-    const { id } = idPart;
+  export const getPersonDetails = (id) => {
     return fetch(
       `https://api.themoviedb.org/3/person/${id}?api_key=${process.env.REACT_APP_TMDB_KEY}`
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        return json;
-      });
-  };
-
-  export const generateRequestToken = () => {
-    return fetch(
-      `https://api.themoviedb.org/3/authentication/token/new?api_key=${process.env.REACT_APP_TMDB_KEY}`
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        return json;
-      });
-  };
-
-  export const generateSession = () => {
-    return fetch(
-      `https://api.themoviedb.org/3/authentication/session/new?api_key=${process.env.REACT_APP_TMDB_KEY}`
     )
       .then((res) => res.json())
       .then((json) => {

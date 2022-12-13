@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { getMovieCredits } from "../api/tmdb-api";
+import { fetchMovieCredits } from "../api/movie-api";
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import Spinner from '../components/spinner';
@@ -8,8 +8,7 @@ const PageTemplate = lazy(() => import('../components/templateCrewListPage'));
 const CrewListPage = (props) => {
   const { id } = useParams();
   const {  data, error, isLoading, isError }  = useQuery(
-    ["credits", { id: id }],
-    getMovieCredits
+    "credits", () => fetchMovieCredits(id)
   );
 
   if (isLoading) {

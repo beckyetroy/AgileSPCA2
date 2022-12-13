@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
-import { getMovie } from "../api/tmdb-api";
+import { fetchMovie } from "../api/movie-api";
 import Spinner from '../components/spinner';
 const PageTemplate = lazy(() => import("../components/templateMoviePage"));
 const ReviewForm = lazy(() => import("../components/reviewForm"));
@@ -11,8 +11,7 @@ const WriteReviewPage = (props) => {
   const movieId = location.state.movieId;
 
   const { data: movie, error, isLoading, isError } = useQuery(
-    ["movie", { id: movieId }],
-    getMovie
+    "movie", () => fetchMovie(movieId)
   );
 
   if (isLoading) {

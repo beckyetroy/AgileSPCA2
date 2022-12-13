@@ -10,7 +10,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import img from '../../images/pexels-dziana-hasanbekava-5480827.jpg'
-import { getGenres } from "../../api/tmdb-api";
+import { fetchGenres } from "../../api/movie-api";
 import { useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 import Autocomplete from '@mui/material/Autocomplete';
@@ -26,7 +26,7 @@ const formControl =
 export default function FilterTrendingCard(props) {
   const navigate = useNavigate();
 
-  const { data, error, isLoading, isError } = useQuery("genres", getGenres);
+  const { data, error, isLoading, isError } = useQuery("genres", fetchGenres);
 
   if (isLoading) {
     return (

@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { useParams } from 'react-router-dom';
-import { getPersonDetails } from '../api/tmdb-api';
+import { fetchPersonDetails } from "../api/movie-api";
 import { useQuery } from "react-query";
 import Spinner from '../components/spinner';
 const PersonDetails = lazy(() => import("../components/personDetails/"));
@@ -8,9 +8,8 @@ const PageTemplate = lazy(() => import("../components/templatePersonPage"));
 
 const PersonPage = (props) => {
   const { id } = useParams();
-  const { data: person, error, isLoading, isError } = useQuery(
-    ["personDetails", { id: id }],
-    getPersonDetails
+  const {  data : person, error, isLoading, isError }  = useQuery(
+    "personDetails", () => fetchPersonDetails(id)
   );
 
   if (isLoading) {

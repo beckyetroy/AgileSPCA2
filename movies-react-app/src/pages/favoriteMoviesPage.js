@@ -1,7 +1,7 @@
 import React, { useContext, lazy, Suspense} from "react";
 import { MoviesContext } from "../contexts/moviesContext";
 import { useQueries } from "react-query";
-import { getMovie } from "../api/tmdb-api";
+import { fetchMovie } from "../api/movie-api";
 import Spinner from '../components/spinner';
 import RemoveFromFavorites from "../components/cardIcons/removeFromFavorites";
 import WriteReview from "../components/cardIcons/writeReview";
@@ -14,8 +14,8 @@ const FavoriteMoviesPage = () => {
   const favoriteMovieQueries = useQueries(
     movieIds.map((movieId) => {
       return {
-        queryKey: ["movie", { id: movieId }],
-        queryFn: getMovie,
+        queryKey: ["movie", movieId],
+        queryFn: () => fetchMovie(movieId),
       };
     })
   );

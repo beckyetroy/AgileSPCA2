@@ -1,13 +1,12 @@
 import React, { lazy, Suspense } from "react";
-import { getTrendingMovies } from "../api/tmdb-api";
+import { fetchTrendingMoviesToday, fetchTrendingMoviesWeek } from "../api/movie-api";
 import { useQuery } from 'react-query';
 import Spinner from '../components/spinner';
 import AddToFavoritesIcon from "../components/cardIcons/addToFavorites";
 const PageTemplate = lazy(() => import('../components/templateMovieListPage'));
 
 const TrendingMoviesPageWeek = (props) => {
-  const time = "week";
-  const {  data, error, isLoading, isError }  = useQuery('discoverTrendingThisWeek', () => getTrendingMovies(time));
+  const {  data, error, isLoading, isError }  = useQuery('discoverTrendingThisWeek', fetchTrendingMoviesWeek);
 
   if (isLoading) {
     return (
@@ -39,8 +38,7 @@ const TrendingMoviesPageWeek = (props) => {
 };
 
 const TrendingMoviesPageDay = (props) => {
-  const time = "day";
-  const {  data, error, isLoading, isError }  = useQuery('discoverTrendingToday', () => getTrendingMovies(time));
+  const {  data, error, isLoading, isError }  = useQuery('discoverTrendingToday', fetchTrendingMoviesToday);
 
   if (isLoading) {
     return (
