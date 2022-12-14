@@ -24,6 +24,17 @@ const MovieDetailsSchema = new Schema({
   overview: { type: String },
   popularity: { type: Number },
   poster_path: { type: String },
+  images: {
+    backdrops: [{
+       aspect_ratio: { type: Number },
+       height: { type: Number },
+       iso_639_1: { type: String },
+       file_path: { type: String },
+       vote_average: { type: Number },
+       vote_count: { type: Number },
+       width: { type: Number }
+    }]
+  },
   production_companies: [{
     id: { type: Number },
     logo_path: { type: String },

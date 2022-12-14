@@ -151,7 +151,15 @@ router.get('/:id', asyncHandler(async (req, res) => {
 router.get('/:id/images', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const images = await getMovieImages(id);
-    if (images) {
+    const movie = await movieDetailsModel.findByMovieDBId(id);
+    if (images && movie) {
+        try {
+            movie.images = images;
+            movie.save();
+            console.info(`movie images successfully stored.`);
+        } catch (err) {
+            console.error(`failed to handle movie images data: ${err}`);
+        }
         res.status(200).json(images);
     } else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
