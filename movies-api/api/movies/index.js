@@ -1,8 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { movieReviews } from './moviesData';
+import { movieReviews, movies } from './moviesData';
 import uniqid from 'uniqid';
 import MovieSchema from './movieModel';
+import movieDetailsModel from './movieDetailsModel';
 import asyncHandler from 'express-async-handler';
 import { getMovies, getUpcomingMovies, getMovie, getMovieImages,
     getTrendingMovies} from '../tmdb/tmdb-api';
@@ -129,7 +130,19 @@ router.get('/:id', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const movie = await getMovie(id);
     if (movie) {
-        res.status(200).json(movie);
+        try {
+            let movieStored = await movieDetailsModel.findByMovieDBId(id);
+            if (movieStored) {
+                console.info(`movie details already stored.`);
+            }
+            else {
+                movieStored = await movieDetailsModel.create(movie);
+                console.info(`movie details successfully stored.`);
+            }
+            res.status(200).json(movieStored);
+          } catch (err) {
+            console.error(`failed to handle movie details data: ${err}`);
+          }
     } else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
     }

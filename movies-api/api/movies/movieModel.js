@@ -35,5 +35,3 @@ MovieSchema.statics.findByMovieDBId = function (id) {
 };
 
 export default MovieSchema;
-
-
