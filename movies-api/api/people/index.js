@@ -1,5 +1,6 @@
 import express from 'express';
 import personModel from './personModel';
+import creditsModel from './creditsModel';
 import { getMovieCredits, getPersonDetails } from '../tmdb/tmdb-api';
 import asyncHandler from 'express-async-handler';
 
@@ -9,7 +10,19 @@ router.get('/movie/:id/credits', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const credits = await getMovieCredits(id);
     if (credits) {
-        res.status(200).json(credits);
+        try {
+            let creditsStored = await creditsModel.findByMovieDBId(id);
+            if (creditsStored) {
+                console.info(`movie credit details already stored.`);
+            }
+            else {
+                creditsStored = await creditsModel.create(credits);
+                console.info(`movie credit details successfully stored.`);
+            }
+            res.status(200).json(credits);
+          } catch (err) {
+            console.error(`failed to handle movie credit details data: ${err}`);
+          }
     } else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
     }

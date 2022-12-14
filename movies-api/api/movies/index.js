@@ -156,7 +156,7 @@ router.get('/:id/images', asyncHandler(async (req, res) => {
         try {
             movie.images = images;
             movie.save();
-            console.info(`movie images successfully stored.`);
+            console.info(`movie images updated.`);
         } catch (err) {
             console.error(`failed to handle movie images data: ${err}`);
         }
