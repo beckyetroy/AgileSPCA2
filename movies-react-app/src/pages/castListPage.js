@@ -8,7 +8,7 @@ const PageTemplate = lazy(() => import('../components/templateCastListPage'));
 const CastListPage = (props) => {
   const { id } = useParams();
   const {  data, error, isLoading, isError }  = useQuery(
-    "credits", () => fetchMovieCredits(id)
+    ["credits", { id: id }], fetchMovieCredits
   );
 
   if (isLoading) {

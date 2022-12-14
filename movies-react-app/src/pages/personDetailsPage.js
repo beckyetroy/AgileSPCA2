@@ -9,7 +9,7 @@ const PageTemplate = lazy(() => import("../components/templatePersonPage"));
 const PersonPage = (props) => {
   const { id } = useParams();
   const {  data : person, error, isLoading, isError }  = useQuery(
-    "personDetails", () => fetchPersonDetails(id)
+    ["personDetails", { id: id }], fetchPersonDetails
   );
 
   if (isLoading) {

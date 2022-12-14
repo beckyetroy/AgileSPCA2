@@ -58,7 +58,9 @@ export const fetchTrendingMoviesToday = async () => {
         method: 'get'}).then(res => res.json())
   };
 
-export const fetchMovie = async (id) => {
+export const fetchMovie = async ({ queryKey }) => {
+    const [, idPart] = queryKey;
+    const { id } = idPart;
     return fetch(`/api/movies/${id}`, {
         headers: {
             'Content-Type': 'application/json'
@@ -66,7 +68,9 @@ export const fetchMovie = async (id) => {
         method: 'get'}).then(res => res.json())
   };
 
-export const fetchMovieImages = async (id) => {
+export const fetchMovieImages = async ({ queryKey }) => {
+    const [, idPart] = queryKey;
+    const { id } = idPart;
     return fetch(`/api/movies/${id}/images`, {
         headers: {
             'Content-Type': 'application/json'
@@ -82,7 +86,9 @@ export const fetchMovieReviews = async (id) => {
         method: 'get'}).then(res => res.json())
   };
 
-export const fetchMovieCredits = async (id) => {
+export const fetchMovieCredits = async (args) => {
+    const [, idPart] = args.queryKey;
+    const { id } = idPart;
     return fetch(`/api/people/movie/${id}/credits`, {
         headers: {
             'Content-Type': 'application/json'
@@ -90,7 +96,9 @@ export const fetchMovieCredits = async (id) => {
         method: 'get'}).then(res => res.json())
   };
 
-export const fetchPersonDetails = async (id) => {
+export const fetchPersonDetails = async (args) => {
+    const [, idPart] = args.queryKey;
+    const { id } = idPart;
     return fetch(`/api/people/${id}`, {
         headers: {
             'Content-Type': 'application/json'

@@ -13,8 +13,8 @@ const MustWatchMoviesPage = () => {
   const mustWatchMovieQueries = useQueries(
     movieIds.map((movieId) => {
       return {
-        queryKey: ["movie", movieId],
-        queryFn: () => fetchMovie(movieId),
+        queryKey: ["movie", { id: movieId }],
+        queryFn: fetchMovie,
       };
     })
   );

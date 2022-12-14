@@ -8,8 +8,9 @@ const PageTemplate = lazy(() => import("../components/templateMoviePage"));
 
 const MoviePage = (props) => {
   const { id } = useParams();
-  const { data: movie, error, isLoading, isError } = useQuery("movie", () =>
-    fetchMovie(id)
+  const { data: movie, error, isLoading, isError } = useQuery(
+    ["movie", { id: id }],
+    fetchMovie
   );
 
   if (isLoading) {

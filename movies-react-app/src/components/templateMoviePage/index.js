@@ -8,8 +8,8 @@ import Carousel from 'react-material-ui-carousel';
 
 const TemplateMoviePage = ({ movie, children }) => {
   const { data , error, isLoading, isError } = useQuery(
-    "images", () =>
-    fetchMovieImages(movie.id)
+    ["images", { id: movie.id }],
+    fetchMovieImages
   );
 
   if (isLoading) {
