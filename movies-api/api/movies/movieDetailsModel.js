@@ -62,7 +62,21 @@ const MovieDetailsSchema = new Schema({
   title: { type: String },
   video: { type: Boolean },
   vote_average: { type: Number },
-  vote_count: { type: Number }
+  vote_count: { type: Number },
+  reviews: [{
+    author: { type: String },
+    author_details: {
+      name: { type: String },
+      username: { type: String },
+      avatar_path: { type: String },
+      rating: { type: Number }
+    },
+    content: { type: String },
+    created_at: { type: Date },
+    id: { type: String },
+    updated_at: { type: Date },
+    url: { type: String }
+  }]
 });
 
 MovieDetailsSchema.statics.findByMovieDBId = function (id) {
