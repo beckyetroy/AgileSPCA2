@@ -133,3 +133,31 @@ export const removeFavourite = (movie, username) => {
         body: JSON.stringify(movie)
     }).then(res => res.json())
   };
+
+export const addMustWatch = (movie, username) => {
+    return fetch('/api/users/' + username + '/mustwatch', {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(movie)
+    }).then(res => res.json())
+  };
+
+export const getMustWatch = async (username) => {
+    return fetch('/api/users/' + username + '/mustwatch', {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'get'}).then(res => res.json())
+  };
+
+export const removeMustWatch = (movie, username) => {
+    return fetch('/api/users/' + username + '/mustwatch?action=remove' , {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(movie)
+    }).then(res => res.json())
+  };

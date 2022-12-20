@@ -1,13 +1,11 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "./authContext";
-import { addFavourite } from "../api/movie-api";
+import React, { useState } from "react";
 
 export const MoviesContext = React.createContext(null);
 
 const MoviesContextProvider = (props) => {
-  const context = useContext(AuthContext);
-  const [favorites, setFavorites] = useState( [] )
-  const [mustWatch, setMustWatch] = useState( [] )
+  //const context = useContext(AuthContext);
+  //const [favorites, setFavorites] = useState( [] )
+  //const [mustWatch, setMustWatch] = useState( [] )
   const [myReviews, setMyReviews] = useState( {} ) 
 
   // const addToFavorites = (movie) => {
@@ -15,29 +13,29 @@ const MoviesContextProvider = (props) => {
   //   addFavourite(movie, username);
   // };
 
-  // We will use this function in a later section
-  const removeFromFavorites = (movie) => {
-    setFavorites( favorites.filter(
-      (mId) => mId !== movie.id
-    ) )
-  };
+  // // We will use this function in a later section
+  // const removeFromFavorites = (movie) => {
+  //   setFavorites( favorites.filter(
+  //     (mId) => mId !== movie.id
+  //   ) )
+  // };
 
-  const addToMustWatch = (movie) => {
-    let newMustWatch = [];
-    if (!mustWatch.includes(movie.id)){
-      newMustWatch = [...mustWatch, movie.id];
-    }
-    else{
-      newMustWatch = [...mustWatch];
-    }
-    setMustWatch(newMustWatch);
-  };
+  // const addToMustWatch = (movie) => {
+  //   let newMustWatch = [];
+  //   if (!mustWatch.includes(movie.id)){
+  //     newMustWatch = [...mustWatch, movie.id];
+  //   }
+  //   else{
+  //     newMustWatch = [...mustWatch];
+  //   }
+  //   setMustWatch(newMustWatch);
+  // };
 
-  const removeFromMustWatch = (movie) => {
-    setMustWatch( mustWatch.filter(
-      (mId) => mId !== movie.id
-    ) )
-  };
+  // const removeFromMustWatch = (movie) => {
+  //   setMustWatch( mustWatch.filter(
+  //     (mId) => mId !== movie.id
+  //   ) )
+  // };
 
   const addReview = (movie, review) => {
     setMyReviews( {...myReviews, [movie.id]: review } )
@@ -47,12 +45,12 @@ const MoviesContextProvider = (props) => {
   return (
     <MoviesContext.Provider
       value={{
-        favorites,
+        //favorites,
         // addToFavorites,
-        removeFromFavorites,
-        mustWatch,
-        addToMustWatch,
-        removeFromMustWatch,
+        //removeFromFavorites,
+        //mustWatch,
+        //addToMustWatch,
+        //removeFromMustWatch,
         addReview,
       }}
     >

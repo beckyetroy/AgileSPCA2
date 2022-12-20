@@ -1,8 +1,7 @@
 import React, { useState, createContext } from "react";
 import { login, signup } from "../api/movie-api";
-import { addFavourite } from "../api/movie-api";
-import { getFavourites } from "../api/movie-api";
-import { removeFavourite } from "../api/movie-api";
+import { addFavourite, getFavourites, removeFavourite } from "../api/movie-api";
+import { addMustWatch, getMustWatch, removeMustWatch } from "../api/movie-api";
 
 export const AuthContext = createContext(null);
 
@@ -12,6 +11,7 @@ const AuthContextProvider = (props) => {
   const [authToken, setAuthToken] = useState(existingToken);
   const [userName, setUserName] = useState("");
   const [favorites, setFavorites] = useState( [] );
+  const [mustwatch, setMustWatch] = useState( [] );
 
   //Function to put JWT token in local storage.
   const setToken = (data) => {
@@ -26,6 +26,7 @@ const AuthContextProvider = (props) => {
       setIsAuthenticated(true);
       setUserName(username);
       getFavoritesList(username);
+      getMustWatchList(username);
     }
   };
 
@@ -56,6 +57,24 @@ const AuthContextProvider = (props) => {
     return (result.code === 201) ? true : false;
   };
 
+  const addToMustWatch = async (movie, username) => {
+    const result = await addMustWatch(movie, username);
+    await getMustWatchList(username);
+    return (result.code === 201) ? true : false;
+  };
+
+  const getMustWatchList = async (username) => {
+    const result = await getMustWatch(username);
+    setMustWatch(result);
+    return (result.code === 201) ? true : false;
+  };
+
+  const removeFromMustWatch = async (movie, username) => {
+    const result = await removeMustWatch(movie, username);
+    setMustWatch(result);
+    return (result.code === 201) ? true : false;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -67,7 +86,11 @@ const AuthContextProvider = (props) => {
         addToFavorites,
         getFavoritesList,
         removeFromFavorites,
-        favorites
+        favorites,
+        addToMustWatch,
+        getMustWatchList,
+        removeFromMustWatch,
+        mustwatch
       }}
     >
       {props.children}

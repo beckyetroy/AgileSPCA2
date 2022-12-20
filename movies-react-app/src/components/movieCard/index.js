@@ -1,5 +1,4 @@
 import React, { useContext  } from "react";
-import { MoviesContext } from "../../contexts/moviesContext";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -18,10 +17,9 @@ import Avatar from '@mui/material/Avatar';
 import { AuthContext } from "../../contexts/authContext";
 
 export default function MovieCard({ movie, action }) {
-  //const { favorites } = useContext(MoviesContext);
-  const { mustWatch } = useContext(MoviesContext);
   const context = useContext(AuthContext);
   const { favorites } = useContext(AuthContext);
+  const { mustwatch } = useContext(AuthContext);
 
   async function setFavourites() {
     if (favorites.find((favourite) => favourite.id === movie.id)) {
@@ -31,14 +29,17 @@ export default function MovieCard({ movie, action }) {
     }
   }
 
-  if (context.isAuthenticated) {
-    setFavourites();
+  async function setMustWatch() {
+    if (mustwatch.find((mustwatchmovie) => mustwatchmovie.id === movie.id)) {
+      movie.mustWatch = true;
+    } else {
+      movie.mustWatch = false;
+    }
   }
 
-  if (mustWatch.find((id) => id === movie.id)) {
-    movie.mustWatch = true;
-  } else {
-    movie.mustWatch = false
+  if (context.isAuthenticated) {
+    setFavourites();
+    setMustWatch();
   }
 
   return (
@@ -85,7 +86,7 @@ export default function MovieCard({ movie, action }) {
           </Grid>
         </Grid>
       </CardContent>
-      <CardActions disableSpacing>
+      <CardActions disableSpacing sx={{justifyContent: "center", alignContent: "center"}}>
         {action(movie)}
         <Link to={`/movies/${movie.id}`}>
           <Button variant="outlined" size="medium" color="primary">

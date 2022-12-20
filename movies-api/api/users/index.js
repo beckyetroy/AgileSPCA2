@@ -54,7 +54,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-//Add a favourite
+//Add or remove a favourite
 router.post('/:userName/favourites', asyncHandler(async (req, res) => {
     const movie = req.body;
     const userName = req.params.userName;
@@ -88,6 +88,42 @@ router.get('/:userName/favourites', asyncHandler( async (req, res) => {
     } else {
       res.status(404).json({ code: 404, msg: 'Unable to Get User Favourites' });
     }
+}));
+
+//Add or remove from must watch
+router.post('/:userName/mustwatch', asyncHandler(async (req, res) => {
+  const movie = req.body;
+  const userName = req.params.userName;
+  const user = await User.findByUserName(userName);
+  if (req.query.action === 'remove') {
+    if (user) {
+      user.mustwatch = await user.mustwatch.filter(
+        (fav) => fav.id !== movie.id
+      );
+      await user.save();
+      res.status(200).json(user.mustwatch);
+    } else {
+      res.status(404).json({ code: 404, msg: 'Unable to Remove from Must Watch' });
+    }
+  }
+  //Else add movie to must watch
+  else {
+    if (!user.mustwatch.find(mustwatch => mustwatch.id === movie.id)) {
+      await user.mustwatch.push(movie);
+      await user.save();
+    }
+    res.status(201).json(user);
+  }
+}));
+
+router.get('/:userName/mustwatch', asyncHandler( async (req, res) => {
+  const userName = req.params.userName;
+  const user = await User.findByUserName(userName);
+  if (user) {
+    res.status(200).json(user.mustwatch);
+  } else {
+    res.status(404).json({ code: 404, msg: 'Unable to Get User Must Watch List' });
+  }
 }));
 
 export default router;
