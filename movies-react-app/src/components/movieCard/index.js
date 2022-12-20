@@ -15,15 +15,24 @@ import Grid from "@mui/material/Grid";
 import img from '../../images/film-poster-placeholder.png'
 import { Link } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
+import { AuthContext } from "../../contexts/authContext";
 
 export default function MovieCard({ movie, action }) {
-  const { favorites } = useContext(MoviesContext);
+  //const { favorites } = useContext(MoviesContext);
   const { mustWatch } = useContext(MoviesContext);
+  const context = useContext(AuthContext);
+  const { favorites } = useContext(AuthContext);
 
-  if (favorites.find((id) => id === movie.id)) {
-    movie.favorite = true;
-  } else {
-    movie.favorite = false
+  async function setFavourites() {
+    if (favorites.find((favourite) => favourite.id === movie.id)) {
+      movie.favorite = true;
+    } else {
+      movie.favorite = false;
+    }
+  }
+
+  if (context.isAuthenticated) {
+    setFavourites();
   }
 
   if (mustWatch.find((id) => id === movie.id)) {

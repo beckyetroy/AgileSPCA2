@@ -1,6 +1,7 @@
 import express from 'express';
 import User from './userModel';
-import movieModel from '../movies/movieModel';
+import mongoose from 'mongoose';
+import MovieSchema from '../movies/movieModel';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 
@@ -21,7 +22,7 @@ router.post('/',asyncHandler( async (req, res, next) => {
     if (req.query.action === 'register') {
         if (/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(req.body.password)) {
             await User.create(req.body);
-            res.status(201).json({code: 201, msg: 'Successful created new user.'});
+            res.status(201).json({code: 201, msg: 'Successfully created new user.'});
         }
         else return res.status(401).json({ code: 401, msg: 'Password invalid.' });
     } else {
@@ -55,21 +56,38 @@ router.put('/:id', async (req, res) => {
 
 //Add a favourite
 router.post('/:userName/favourites', asyncHandler(async (req, res) => {
-    const newFavourite = req.body.id;
+    const movie = req.body;
     const userName = req.params.userName;
-    const movie = await movieModel.findByMovieDBId(newFavourite);
     const user = await User.findByUserName(userName);
-    if (!user.favourites.includes(movie._id)) {
-        await user.favourites.push(movie._id);
+    if (req.query.action === 'remove') {
+      if (user) {
+        user.favourites = await user.favourites.filter(
+          (fav) => fav.id !== movie.id
+        );
         await user.save();
+        res.status(200).json(user.favourites);
+      } else {
+        res.status(404).json({ code: 404, msg: 'Unable to Remove Favourite' });
+      }
     }
-    res.status(201).json(user); 
+    //Else add movie to favourites
+    else {
+      if (!user.favourites.find(favourite => favourite.id === movie.id)) {
+        await user.favourites.push(movie);
+        await user.save();
+      }
+      res.status(201).json(user);
+    }
 }));
 
 router.get('/:userName/favourites', asyncHandler( async (req, res) => {
     const userName = req.params.userName;
-    const user = await User.findByUserName(userName).populate('favourites');
-    res.status(200).json(user.favourites);
+    const user = await User.findByUserName(userName);
+    if (user) {
+      res.status(200).json(user.favourites);
+    } else {
+      res.status(404).json({ code: 404, msg: 'Unable to Get User Favourites' });
+    }
 }));
 
 export default router;

@@ -105,3 +105,31 @@ export const fetchPersonDetails = async (args) => {
         },
         method: 'get'}).then(res => res.json())
   };
+
+export const addFavourite = (movie, username) => {
+    return fetch('/api/users/' + username + '/favourites', {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(movie)
+    }).then(res => res.json())
+  };
+
+export const getFavourites = async (username) => {
+    return fetch('/api/users/' + username + '/favourites', {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'get'}).then(res => res.json())
+  };
+
+export const removeFavourite = (movie, username) => {
+    return fetch('/api/users/' + username + '/favourites?action=remove' , {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(movie)
+    }).then(res => res.json())
+  };

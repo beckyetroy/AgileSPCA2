@@ -1,22 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "./authContext";
+import { addFavourite } from "../api/movie-api";
 
 export const MoviesContext = React.createContext(null);
 
 const MoviesContextProvider = (props) => {
+  const context = useContext(AuthContext);
   const [favorites, setFavorites] = useState( [] )
   const [mustWatch, setMustWatch] = useState( [] )
   const [myReviews, setMyReviews] = useState( {} ) 
 
-  const addToFavorites = (movie) => {
-    let newFavorites = [];
-    if (!favorites.includes(movie.id)){
-      newFavorites = [...favorites, movie.id];
-    }
-    else{
-      newFavorites = [...favorites];
-    }
-    setFavorites(newFavorites)
-  };
+  // const addToFavorites = (movie) => {
+  //   let username = context.userName;
+  //   addFavourite(movie, username);
+  // };
 
   // We will use this function in a later section
   const removeFromFavorites = (movie) => {
@@ -51,7 +48,7 @@ const MoviesContextProvider = (props) => {
     <MoviesContext.Provider
       value={{
         favorites,
-        addToFavorites,
+        // addToFavorites,
         removeFromFavorites,
         mustWatch,
         addToMustWatch,
