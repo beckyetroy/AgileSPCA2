@@ -36,8 +36,8 @@ const AuthContextProvider = (props) => {
     return (result.code === 201) ? true : false;
   };
 
-  const signout = () => {
-    setTimeout(() => setIsAuthenticated(false), 100);
+  const signout = async () => {
+    await setIsAuthenticated(false);
   }
 
   const addToFavorites = async (movie, username) => {
