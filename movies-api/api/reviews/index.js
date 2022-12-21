@@ -9,7 +9,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const reviews = await getMovieReviews(id);
     const movie = await movieDetailsModel.findByMovieDBId(id);
-    if (reviews && movie) {
+    if (reviews && movie && !movie.reviews.length) {
         try {
             movie.reviews = reviews;
             movie.save();
@@ -18,7 +18,10 @@ router.get('/:id', asyncHandler(async (req, res) => {
             console.error(`failed to handle movie reviews data: ${err}`);
         }
         res.status(200).json(reviews);
-    } else {
+    } else if (movie && movie.reviews.length) {
+        res.status(200).json(movie.reviews);
+    }
+    else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
     }
 }));
