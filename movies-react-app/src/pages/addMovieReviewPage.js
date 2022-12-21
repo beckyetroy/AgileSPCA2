@@ -11,7 +11,8 @@ const WriteReviewPage = (props) => {
   const movieId = location.state.movieId;
 
   const { data: movie, error, isLoading, isError } = useQuery(
-    "movie", () => fetchMovie(movieId)
+    ["movie", { id: movieId }],
+    fetchMovie
   );
 
   if (isLoading) {

@@ -23,4 +23,22 @@ router.get('/:id', asyncHandler(async (req, res) => {
     }
 }));
 
+router.post('/:id', asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id);
+    const review = req.body;
+    const movie = await movieDetailsModel.findByMovieDBId(id);
+    if (movie) {
+        try {
+            movie.reviews.push(review);
+            movie.save();
+            console.info(`movie review successfully added.`);
+        } catch (err) {
+            console.error(`failed to handle movie review data: ${err}`);
+        }
+        res.status(200).json(movie.reviews);
+    } else {
+        res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
+    }
+}));
+
 export default router;

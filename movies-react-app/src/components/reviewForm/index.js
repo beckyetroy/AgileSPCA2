@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Rating from '@mui/material/Rating';
 import { useForm, Controller } from "react-hook-form";
 import React, { useState, useContext } from "react";
-import { MoviesContext } from "../../contexts/moviesContext";
+import { AuthContext } from "../../contexts/authContext";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
@@ -38,14 +38,19 @@ const styles = {
 };
 
 const ReviewForm = ({ movie }) => {
-  const context = useContext(MoviesContext);
+  const context = useContext(AuthContext);
   const [rating, setRating] = useState(3);
+  const [author, setAuthor] = useState("");
+  const [reviewContent, setReviewContent] = useState("");
   const [open, setOpen] = useState(false); 
+  const [authorError, setAuthorError] = useState('');
+  const [contentError, setContentError] = useState('');
   const navigate = useNavigate();
+  const username = context.userName;
 
   const defaultValues = {
     author: "",
-    review: "",
+    reviewContent: "",
     agree: false,
     rating: 3,
   };
@@ -58,14 +63,46 @@ const ReviewForm = ({ movie }) => {
   } = useForm(defaultValues);
 
   const handleRatingChange = (event) => {
+    event.preventDefault();
     setRating(Number(event.target.value));
   };
 
+  const handleAuthorChange = (event) => {
+    event.preventDefault();
+    setAuthor(event.target.value);
+  };
+
+  const handleContentChange = (event) => {
+    event.preventDefault();
+    setReviewContent(event.target.value);
+  };
+
   const onSubmit = (review) => {
-    review.movieId = movie.id;
-    review.rating = rating;
-    context.addReview(movie, review);
-    setOpen(true); // NEW
+    //Perform form validation
+    if (author === '') {
+      setAuthorError('Name is Required');
+    } else if (reviewContent === ''){
+      setContentError('Review cannot be empty');
+    } else if (reviewContent.length < 10) {
+      setContentError('Review is too short');
+    }
+    else {
+      let newReview = {
+        rating: rating,
+        author: author,
+        author_details: {
+          name: author,
+          username: username,
+          rating: rating,
+        },
+        content: reviewContent,
+        created_at: new Date(),
+        id: Math.random().toString(36).slice(2, 7),
+        updated_at: new Date()
+      }
+      context.addMovieReview(movie, newReview);
+      setOpen(true); // NEW
+    }
   };
 
   const handleSnackClose = (event) => {
@@ -97,60 +134,42 @@ const ReviewForm = ({ movie }) => {
       </Snackbar>
 
       <form sx={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Controller
+        <TextField
+          sx={{ width: "40ch" }}
+          defaultValue=""
+          variant="outlined"
+          margin="normal"
+          onChange={handleAuthorChange}
+          value={author}
+          id="author"
+          label="Author's name"
           name="author"
-          control={control}
-          rules={{ required: "Name is required" }}
-          defaultValue=""
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              sx={{ width: "40ch" }}
-              variant="outlined"
-              margin="normal"
-              required
-              onChange={onChange}
-              value={value}
-              id="author"
-              label="Author's name"
-              name="author"
-              autoFocus
-            />
-          )}
+          autoFocus
         />
-        {errors.author && (
-          <Typography variant="h6" component="p">
-            {errors.author.message}
-          </Typography>
-        )}
-        <Controller
-          name="review"
-          control={control}
-          rules={{
-            required: "Review cannot be empty.",
-            minLength: { value: 10, message: "Review is too short" },
-          }}
+        <Typography variant="h6" component="p">
+          { authorError ? 
+              authorError
+          : null }
+        </Typography>
+  
+        <TextField
+          variant="outlined"
+          margin="normal"
+          fullWidth
           defaultValue=""
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="review"
-              value={value}
-              onChange={onChange}
-              label="Review text"
-              id="review"
-              multiline
-              minRows={10}
-            />
-          )}
+          name="reviewContent"
+          value={reviewContent}
+          onChange={handleContentChange}
+          label="Review text"
+          id="reviewContent"
+          multiline
+          minRows={10}
         />
-        {errors.review && (
-          <Typography variant="h6" component="p">
-            {errors.review.message}
-          </Typography>
-        )}
+        <Typography variant="h6" component="p">
+          { contentError ? 
+              contentError
+          : null }
+        </Typography>
 
         <Controller
           control={control}
@@ -183,10 +202,9 @@ const ReviewForm = ({ movie }) => {
             color="secondary"
             sx={styles.submit}
             onClick={() => {
-              reset({
-                author: "",
-                content: "",
-              });
+              setAuthor('');
+              setReviewContent('');
+              setRating(3);
             }}
           >
             Reset

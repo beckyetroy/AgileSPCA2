@@ -86,6 +86,16 @@ export const fetchMovieReviews = async (id) => {
         method: 'get'}).then(res => res.json())
   };
 
+export const addReview = (movieId, review) => {
+    return fetch(`/api/reviews/${movieId}`, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'post',
+        body: JSON.stringify(review)
+    }).then(res => res.json())
+  };
+
 export const fetchMovieCredits = async (args) => {
     const [, idPart] = args.queryKey;
     const { id } = idPart;

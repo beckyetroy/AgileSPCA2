@@ -1,7 +1,5 @@
 import express from 'express';
 import User from './userModel';
-import mongoose from 'mongoose';
-import MovieSchema from '../movies/movieModel';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 

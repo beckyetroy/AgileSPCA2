@@ -2,6 +2,7 @@ import React, { useState, createContext } from "react";
 import { login, signup } from "../api/movie-api";
 import { addFavourite, getFavourites, removeFavourite } from "../api/movie-api";
 import { addMustWatch, getMustWatch, removeMustWatch } from "../api/movie-api";
+import { addReview } from "../api/movie-api";
 
 export const AuthContext = createContext(null);
 
@@ -75,6 +76,11 @@ const AuthContextProvider = (props) => {
     return (result.code === 201) ? true : false;
   };
 
+  const addMovieReview = async (movie, review) => {
+    const result = await addReview(movie.id, review);
+    return (result.code === 201) ? true : false;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -90,7 +96,8 @@ const AuthContextProvider = (props) => {
         addToMustWatch,
         getMustWatchList,
         removeFromMustWatch,
-        mustwatch
+        mustwatch,
+        addMovieReview
       }}
     >
       {props.children}

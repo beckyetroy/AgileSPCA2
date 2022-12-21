@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter, Route, Navigate, Routes } from "react-router-dom";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { ReactQueryDevtools } from 'react-query/devtools';
-import MoviesContextProvider from "./contexts/moviesContext";
 import { TrendingMoviesPageWeek, TrendingMoviesPageDay} from "./pages/trendingMoviesPage";
 import SiteHeader from './components/siteHeader';
 import LoginPage from "./pages/logInPage";
@@ -39,7 +38,6 @@ const App = () => {
           <Suspense fallback={<h1>Loading header</h1>}>
             <SiteHeader />
           </Suspense>
-          <MoviesContextProvider>
           <Suspense fallback={<h1>Loading page</h1>}>
             <Routes>
               <Route path="/login" element={ <LoginPage /> } />
@@ -63,7 +61,6 @@ const App = () => {
               <Route path="*" element={ <Navigate to="/" /> } />
             </Routes>
           </Suspense>
-          </MoviesContextProvider>
         </AuthProvider>
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />
