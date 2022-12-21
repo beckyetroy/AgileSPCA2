@@ -19,12 +19,13 @@ const formControl =
 
 const LoginPage = props => {
   const context = useContext(AuthContext);
+  const error = context.errorMessage;
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = () => {
-    context.authenticate(userName, password);
+  const login = async () => {
+    await context.authenticate(userName, password);
   };
 
   let location = useLocation();
@@ -68,6 +69,11 @@ const LoginPage = props => {
                 setPassword(e.target.value);
               }}
             />
+            <Typography variant="h9" component="p" sx={{fontStyle: "italic"}}>
+              { error ? 
+                  error
+              : null }
+            </Typography>
           </CardContent>
           <CardActions style={{justifyContent: 'center'}}>
             <Button variant="contained" size="large" onClick={login} sx={{maxWidth: '90%',

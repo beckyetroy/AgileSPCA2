@@ -80,6 +80,10 @@ const SiteHeader = ({ history }) => {
       navigate("/", { replace: true });
       setOpen(true);
     }
+    else if (pageURL === "/login") {
+      context.setErrorMessage("");
+      navigate(pageURL, { replace: true });
+    }
     else navigate(pageURL, { replace: true });
   };
 

@@ -13,6 +13,7 @@ const AuthContextProvider = (props) => {
   const [userName, setUserName] = useState("");
   const [favorites, setFavorites] = useState( [] );
   const [mustwatch, setMustWatch] = useState( [] );
+  const [errorMessage, setErrorMessage] = useState("");
 
   //Function to put JWT token in local storage.
   const setToken = (data) => {
@@ -22,12 +23,22 @@ const AuthContextProvider = (props) => {
 
   const authenticate = async (username, password) => {
     const result = await login(username, password);
+    if (result.msg === "Authentication failed. Wrong password.") {
+      await setErrorMessage("Invalid password. Please try again.");
+    }
+    else if (result.msg === "Please pass username and password.") {
+      await setErrorMessage("Please enter username and password.");
+    }
+    else if (result.msg === "Authentication failed. User not found.") {
+      await setErrorMessage("User not found. Please try again or sign up below.");
+    }
     if (result.token) {
       setToken(result.token)
       setIsAuthenticated(true);
       setUserName(username);
       getFavoritesList(username);
       getMustWatchList(username);
+      setErrorMessage("");
     }
   };
 
@@ -97,7 +108,9 @@ const AuthContextProvider = (props) => {
         getMustWatchList,
         removeFromMustWatch,
         mustwatch,
-        addMovieReview
+        addMovieReview,
+        errorMessage,
+        setErrorMessage
       }}
     >
       {props.children}
