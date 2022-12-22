@@ -7,6 +7,7 @@ import moviesRouter from './api/movies';
 import genresRouter from './api/genres';
 import peopleRouter from './api/people';
 import reviewsRouter from './api/reviews';
+import googleRouter from './google-api';
 import './db';
 import './seedData';
 
@@ -31,6 +32,7 @@ app.use('/api/movies', moviesRouter);
 app.use('/api/genres', genresRouter);
 app.use('/api/people', peopleRouter);
 app.use('/api/reviews', reviewsRouter);
+app.use('/api/google', googleRouter);
 //Users router
 app.use('/api/users', usersRouter);
 app.use(errHandler);

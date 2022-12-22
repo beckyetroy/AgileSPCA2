@@ -9,6 +9,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Button from '@mui/material/Button';
+import GoogleAuthButton from "../components/googleAuthButton";
 
 const formControl = 
   {
@@ -83,6 +84,7 @@ const LoginPage = props => {
               }}>
             Log In
             </Button>
+            <GoogleAuthButton />
           </CardActions>
           <Typography variant="p" component="p" sx={{textAlign: "center", padding: '1%'}}>
               Not Registered?

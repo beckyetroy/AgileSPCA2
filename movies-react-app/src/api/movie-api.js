@@ -181,3 +181,22 @@ export const removeMustWatch = (movie, username) => {
         body: JSON.stringify(movie)
     }).then(res => res.json())
   };
+
+export const googleAuthenticate = (authCode) => {
+    return fetch('/api/google/authenticate', {
+        method: 'post',
+        body: authCode
+    }).then(res => res.json())
+  };
+
+export const googleLoad = () => {
+    return fetch('/api/google', {
+        method: 'get',
+    }).then(res => res.json())
+  };
+
+export const googleSignIn = () => {
+    return fetch('/api/google/signin', {
+        method: 'get',
+    }).then(res => res.json())
+  };
