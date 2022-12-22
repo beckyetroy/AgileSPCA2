@@ -44,7 +44,10 @@ const AuthContextProvider = (props) => {
 
   const register = async (username, password) => {
     const result = await signup(username, password);
-    return (result.code === 201) ? true : false;
+    if (result.msg === "Sign up failed. Username already taken.") {
+      return false;
+    }
+    else return true;
   };
 
   const signout = async () => {

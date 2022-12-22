@@ -18,11 +18,17 @@ router.post('/',asyncHandler( async (req, res, next) => {
       return next();
     }
     if (req.query.action === 'register') {
-        if (/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/.test(req.body.password)) {
-            await User.create(req.body);
-            res.status(201).json({code: 201, msg: 'Successfully created new user.'});
-        }
-        else return res.status(401).json({ code: 401, msg: 'Password invalid.' });
+      const user = await User.findByUserName(req.body.username);
+      if (user) {
+        return res.status(401).json({success: false, msg: 'Sign up failed. Username already taken.'});
+      }
+      else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(req.body.password)) {
+         return res.status(401).json({ code: 401, msg: 'Sign up failed. Password invalid.' });
+      }
+      else {
+        await User.create(req.body);
+        res.status(201).json({code: 201, msg: 'Successfully created new user.'});
+      }
     } else {
       const user = await User.findByUserName(req.body.username);
         if (!user) return res.status(401).json({ code: 401, msg: 'Authentication failed. User not found.' });
