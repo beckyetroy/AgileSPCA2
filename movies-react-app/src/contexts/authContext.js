@@ -14,6 +14,7 @@ const AuthContextProvider = (props) => {
   const [favorites, setFavorites] = useState( [] );
   const [mustwatch, setMustWatch] = useState( [] );
   const [errorMessage, setErrorMessage] = useState("");
+  const [favoriteRemoved, setFavoriteRemoved] = useState(false);
 
   //Function to put JWT token in local storage.
   const setToken = (data) => {
@@ -69,6 +70,7 @@ const AuthContextProvider = (props) => {
   const removeFromFavorites = async (movie, username) => {
     const result = await removeFavourite(movie, username);
     setFavorites(result);
+    setFavoriteRemoved(true);
     return (result.code === 201) ? true : false;
   };
 
@@ -113,7 +115,9 @@ const AuthContextProvider = (props) => {
         mustwatch,
         addMovieReview,
         errorMessage,
-        setErrorMessage
+        setErrorMessage,
+        favoriteRemoved,
+        setFavoriteRemoved
       }}
     >
       {props.children}
