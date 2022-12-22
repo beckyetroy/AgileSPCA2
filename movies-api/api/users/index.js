@@ -2,8 +2,24 @@ import express from 'express';
 import User from './userModel';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt-nodejs';
 
 const router = express.Router(); // eslint-disable-line
+
+function hashPassword(user, next) {
+  bcrypt.genSalt(10, (err, salt) => {
+      if (err) {
+          return next(err);
+      }
+      bcrypt.hash(user.password, salt, null, (err, hash) => {
+          if (err) {
+              return next(err);
+          }
+          user.password = hash;
+          next();
+      });
+  });
+}
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -26,8 +42,14 @@ router.post('/',asyncHandler( async (req, res, next) => {
          return res.status(401).json({ code: 401, msg: 'Sign up failed. Password invalid.' });
       }
       else {
-        await User.create(req.body);
-        res.status(201).json({code: 201, msg: 'Successfully created new user.'});
+        // Hash the password
+        hashPassword(req.body, (err) => {
+          if (err) {
+              return res.status(500).json({ code: 500, msg: 'Failed to hash password' });
+          }
+          User.create(req.body);
+          res.status(201).json({code: 201, msg: 'Successfully created new user.'});
+        });
       }
     } else {
       const user = await User.findByUserName(req.body.username);
@@ -45,17 +67,28 @@ router.post('/',asyncHandler( async (req, res, next) => {
       }
 }));
 
-// Update a user
-router.put('/:id', async (req, res) => {
-    if (req.body._id) delete req.body._id;
-    const result = await User.updateOne({
-        _id: req.params.id,
-    }, req.body);
-    if (result.matchedCount) {
-        res.status(200).json({ code:200, msg: 'User Updated Sucessfully' });
-    } else {
-        res.status(404).json({ code: 404, msg: 'Unable to Update User' });
+// Change User Password
+router.put('/:userName', async (req, res) => {
+    const userName = req.params.userName;
+    const user = await User.findByUserName(userName);
+    if (req.body.password) {
+      // Hash the new password
+      hashPassword(req.body, async (err) => {
+        if (err) {
+            return res.status(500).json({ code: 500, msg: 'Failed to hash password' });
+        }
+        const result = await User.updateOne({
+            _id: user._id,
+        }, req.body);
+        await user.save();
+        if (result.matchedCount) {
+            res.status(200).json({ code:200, msg: 'User Updated Sucessfully' });
+        } else {
+            res.status(404).json({ code: 404, msg: 'Unable to Update User' });
+        }
+     });
     }
+    else res.status(404).json({ code:404, msg: 'Unable to parse password' });
 });
 
 //Add or remove a favourite

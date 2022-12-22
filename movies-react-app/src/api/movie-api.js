@@ -18,6 +18,16 @@ export const signup = (username, password) => {
     }).then(res => res.json())
 };
 
+export const updateProfile = (username, password) => {
+    return fetch('/api/users/' + username, {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'put',
+        body: JSON.stringify({ username: username, password: password })
+    }).then(res => res.json())
+};
+
 export const fetchGenres = async () => {
     return fetch("/api/genres", {
         headers: {

@@ -7,6 +7,7 @@ import { TrendingMoviesPageWeek, TrendingMoviesPageDay} from "./pages/trendingMo
 import SiteHeader from './components/siteHeader';
 import LoginPage from "./pages/logInPage";
 import SignUpPage from "./pages/signUpPage";
+import ChangeProfilePage from "./pages/changeProfilePage";
 import AuthProvider from "./contexts/authContext";
 import ProtectedRoutes from "./contexts/protectedRoutes";
 const HomePage = lazy(() => import("./pages/homePage"));
@@ -45,6 +46,7 @@ const App = () => {
               <Route path="/reviews/:id" element={ <MovieReviewPage /> } />
 
               <Route element={<ProtectedRoutes />}>
+                <Route path="/account" element={<ChangeProfilePage />} />
                 <Route path="/movies/favorites" element={<FavoriteMoviesPage />} />
                 <Route path="/movies/mustwatch" element={<MustWatchMoviesPage />} />
                 <Route path="/reviews/form" element={ <AddMovieReviewPage /> } />

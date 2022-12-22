@@ -1,5 +1,5 @@
 import React, { useState, createContext } from "react";
-import { login, signup } from "../api/movie-api";
+import { login, signup, updateProfile } from "../api/movie-api";
 import { addFavourite, getFavourites, removeFavourite } from "../api/movie-api";
 import { addMustWatch, getMustWatch, removeMustWatch } from "../api/movie-api";
 import { addReview } from "../api/movie-api";
@@ -47,6 +47,14 @@ const AuthContextProvider = (props) => {
   const register = async (username, password) => {
     const result = await signup(username, password);
     if (result.msg === "Sign up failed. Username already taken.") {
+      return false;
+    }
+    else return true;
+  };
+
+  const updateUser = async (username, password) => {
+    const result = await updateProfile(username, password);
+    if (result.msg === "Unable to Update User.") {
       return false;
     }
     else return true;
@@ -105,6 +113,7 @@ const AuthContextProvider = (props) => {
         isAuthenticated,
         authenticate,
         register,
+        updateUser,
         signout,
         userName,
         addToFavorites,

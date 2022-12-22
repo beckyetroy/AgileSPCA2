@@ -11,42 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { AuthContext } from "../../contexts/authContext";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
-
-const styles = {
-  root: {
-    marginTop: 2,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "left",
-  },
-  form: {
-    width: "100%",
-    "& > * ": {
-      marginTop: 2,
-    },
-  },
-  textField: {
-    width: "40ch",
-  },
-  submit: {
-    marginRight: 2,
-  },
-  snack: {
-    width: "50%",
-    "& > * ": {
-      width: "100%",
-    },
-  },
-};
+import { AuthContext } from "../../contexts/authContext"
 
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 const SiteHeader = ({ history }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openSnack, setOpen] = useState(false); 
   const open = Boolean(anchorEl);
   const context = useContext(AuthContext);
 
@@ -65,7 +35,7 @@ const SiteHeader = ({ history }) => {
     menuOptions.push(
       { label: "Favorites", path: "/movies/favorites" },
       { label: "Must Watch", path: "/movies/mustwatch" },
-      { label: "Log Out", path: "/logout" }
+      { label: "My Account", path: "/account" }
     )
   }
   else {
@@ -75,12 +45,7 @@ const SiteHeader = ({ history }) => {
   }
 
   const handleMenuSelect = (pageURL) => {
-    if (pageURL === "/logout") {
-      context.signout();
-      navigate("/", { replace: true });
-      setOpen(true);
-    }
-    else if (pageURL === "/login") {
+    if (pageURL === "/login") {
       context.setErrorMessage("");
       navigate(pageURL, { replace: true });
     }
@@ -89,11 +54,6 @@ const SiteHeader = ({ history }) => {
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
-  };
-
-  const handleSnackClose = (event) => {
-    setOpen(false);
-    navigate("/");
   };
 
   return (
@@ -159,22 +119,6 @@ const SiteHeader = ({ history }) => {
             )}
         </Toolbar>
       </AppBar>
-      <Snackbar
-        sx={styles.snack}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        open={openSnack}
-        onClose={handleSnackClose}
-      >
-        <MuiAlert
-          severity="success"
-          variant="filled"
-          onClose={handleSnackClose}
-        >
-          <Typography variant="h4">
-            Successfully Logged out
-          </Typography>
-        </MuiAlert>
-      </Snackbar>
       <Offset />
     </>
   );
