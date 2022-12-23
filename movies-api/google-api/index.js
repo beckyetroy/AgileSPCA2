@@ -9,7 +9,6 @@ const router = express.Router();
 router.get('/', asyncHandler( async(req, res) => {
     try {
      await start();
-     console.log(res);
     } catch (err) {
         return res.json;
     }
@@ -18,7 +17,6 @@ router.get('/', asyncHandler( async(req, res) => {
 router.post('/authenticate', asyncHandler( async(req, res) => {
     try {
      await exchangeAuthCodeForTokens(req.body);
-     console.log(res);
     } catch (err) {
         return res.json;
     }
@@ -27,7 +25,6 @@ router.post('/authenticate', asyncHandler( async(req, res) => {
 router.get('/signin', asyncHandler( async(req, res) => {
     try {
      await grantOfflineAccess;
-     console.log(res);
     } catch (err) {
         return res.json;
     }
