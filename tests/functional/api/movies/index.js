@@ -193,15 +193,13 @@ describe("Movies endpoint", () => {
 
     describe("when the movie has been called previously", () => {
 
-      beforeEach(() => {
-        return request(api)
-        .get(`/api/movies/${movies[0].id}`)
+      beforeEach(async () => {
+        const res = await request(api)
+          .get(`/api/movies/${movies[0].id}`)
           .set("Accept", "application/json")
           .expect("Content-Type", /json/)
-          .expect(200)
-          .then((res) => {
-            expect(res.body).to.have.property("title", movies[0].title);
-          });
+          .expect(200);
+        expect(res.body).to.have.property("title", movies[0].title);
       });
 
       describe("when the id is valid", () => {

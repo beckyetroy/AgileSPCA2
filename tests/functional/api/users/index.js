@@ -8,18 +8,13 @@ const expect = chai.expect;
 let db;
 
 describe("Users endpoint", () => {
+
   before(async () => {
     mongoose.connect(process.env.MONGO_DB, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     db = mongoose.connection;
-
-    try {
-        await User.deleteMany();
-    } catch (err) {
-    console.error(`failed to delete user data: ${err}`);
-    }
   });
 
   after(async () => {
@@ -30,33 +25,77 @@ describe("Users endpoint", () => {
     }
   });
 
+  beforeEach(async () => {
+    try {
+      await User.deleteMany();
+    } catch (err) {
+      console.error(`failed to delete user data: ${err}`);
+    }
+    try {
+      await request(api)
+        .post("/api/users?action=register")
+        .send({
+          username: "testuser1",
+          password: "TestPW123!",
+        })
+        .expect(201)
+        .expect({ msg: "Successfully created new user.", code: 201 });
+    } catch (err) {
+      console.error(`failed to register user data: ${err}`);
+    }
+    try {
+      await request(api)
+        .post("/api/users?action=register")
+        .send({
+          username: "testuser2",
+          password: "SecondTestPW456?",
+        })
+        .expect(201)
+        .expect({ msg: "Successfully created new user.", code: 201 });
+    } catch (err) {
+      console.error(`failed to register user data: ${err}`);
+    }
+  });
+
   afterEach(() => {
     api.close();
   });
 
+  describe("GET /api/users ", () => {
+
+    it("should return the 2 added users and a status 200", (done) => {
+        request(api)
+        .get("/api/users")
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .end((err, res) => {
+          expect(res.body).to.be.a("array");
+          expect(res.body.length).to.equal(2);
+          let result = res.body.map((user) => user.username);
+          expect(result).to.have.members(["testuser1", "testuser2"]);
+          done();
+        });
+    });
+  });
+
   describe("POST /api/users ", () => {
+
     describe("For registering", () => {
+
         describe("when credentials are missing", () => {
-            before(() => {
-                return request(api)
+            //Confirm still only 2 users from before hook are returned
+            afterEach(async () => {
+              const res = await request(api)
                 .get("/api/users")
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
-                .expect(200)
-                .then((res) => {
-                    expect(res.body.length).to.equal(0);
-                });
+                .expect(200);
+              expect(res.body.length).to.equal(2);
+              const result = res.body.map((user) => user.username);
+              expect(result).to.have.members(["testuser1", "testuser2"]);
             });
-            after(() => {
-                return request(api)
-                .get("/api/users")
-                .set("Accept", "application/json")
-                .expect("Content-Type", /json/)
-                .expect(200)
-                .then((res) => {
-                    expect(res.body.length).to.equal(0);
-                });
-            });
+
             it("should return a 401 status and error message when all details are missing", () => {
                 return request(api)
                   .post("/api/users?action=register")
@@ -70,11 +109,12 @@ describe("Users endpoint", () => {
                       success: false
                   });
               });
+
             it("should return a 401 status and error message when password is missing", () => {
               return request(api)
                 .post("/api/users?action=register")
                 .send({
-                  username: "testuser"
+                  username: "testuser3"
                 })
                 .set("Accept", "application/json")
                 .expect("Content-Type", /json/)
@@ -84,47 +124,41 @@ describe("Users endpoint", () => {
                     success: false
                 });
             });
+
             it("should return a 401 status and error message when username is missing", () => {
-                return request(api)
-                  .post("/api/users?action=register")
-                  .send({
-                    password: "TestPW123!"
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Please pass username and password.',
-                      success: false
-                  });
-              });
-        });
-      describe("when password is invalid", () => {
-        before(() => {
-            return request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .then((res) => {
-                expect(res.body.length).to.equal(0);
+              return request(api)
+                .post("/api/users?action=register")
+                .send({
+                  password: "ThirdTestPW123!"
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Please pass username and password.',
+                    success: false
+                });
             });
         });
-        after(() => {
-            return request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .then((res) => {
-                expect(res.body.length).to.equal(0);
-            });
-        });
+
+        describe("when password is invalid", () => {
+          //Confirm still only 2 users from before hook are returned
+          afterEach(async () => {
+              const res = await request(api)
+                .get("/api/users")
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(200);
+              expect(res.body.length).to.equal(2);
+              const result = res.body.map((user) => user.username);
+              expect(result).to.have.members(["testuser1", "testuser2"]);
+          });
+
         it("should return a 401 status and error message", () => {
           return request(api)
             .post("/api/users?action=register")
             .send({
-              username: "testuser",
+              username: "testuser3",
               password: "testpassword",
             })
             .set("Accept", "application/json")
@@ -136,55 +170,46 @@ describe("Users endpoint", () => {
             });
         });
       });
+
       describe("when credentials are valid", () => {
-        after(() => {
-            return request(api)
-              .get("/api/users")
-              .set("Accept", "application/json")
-              .expect("Content-Type", /json/)
-              .expect(200)
-              .then((res) => {
-                expect(res.body.length).to.equal(1);
-                const result = res.body.map((user) => user.username);
-                expect(result).to.have.members(["testuser1"]);
-              });
+        //Check that created user is now returned
+        afterEach(async () => {
+          const res = await request(api)
+            .get("/api/users")
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200);
+          expect(res.body.length).to.equal(3);
+          const result = res.body.map((user) => user.username);
+          expect(result).to.have.members(["testuser1", "testuser2", "testuser3"]);
         });
+
         it("should return a 201 status and the confirmation message", () => {
           return request(api)
             .post("/api/users?action=register")
             .send({
-              username: "testuser1",
-              password: "TestPW123!",
+              username: "testuser3",
+              password: "ThirdTestPW123!",
             })
             .expect(201)
             .expect({ msg: "Successfully created new user.", code: 201 });
         });
       });
+  
       describe("when username already exists", () => {
-        before(() => {
-            return request(api)
+
+        afterEach(async () => {
+          //Confirm still only 2 users from before hook are returned
+          const res = await request(api)
             .get("/api/users")
             .set("Accept", "application/json")
             .expect("Content-Type", /json/)
-            .expect(200)
-            .then((res) => {
-              expect(res.body.length).to.equal(1);
-              const result = res.body.map((user) => user.username);
-              expect(result).to.have.members(["testuser1"]);
-            });
+            .expect(200);
+          expect(res.body.length).to.equal(2);
+          const result = res.body.map((user) => user.username);
+          expect(result).to.have.members(["testuser1", "testuser2"]);
         });
-        after(() => {
-            return request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .then((res) => {
-              expect(res.body.length).to.equal(1);
-              const result = res.body.map((user) => user.username);
-              expect(result).to.have.members(["testuser1"]);
-            });
-        });
+
         it("should return a 401 status and error message", () => {
           return request(api)
             .post("/api/users?action=register")
@@ -202,8 +227,11 @@ describe("Users endpoint", () => {
         });
       });
     });
+
     describe("For logging in", () => {
+
         describe("when credentials are missing", () => {
+
             it("should return a 401 status and error message when all details are missing", () => {
                 return request(api)
                   .post("/api/users")
@@ -217,6 +245,7 @@ describe("Users endpoint", () => {
                       success: false
                   });
             });
+
             it("should return a 401 status and error message when password is missing", () => {
               return request(api)
                 .post("/api/users")
@@ -231,6 +260,7 @@ describe("Users endpoint", () => {
                     success: false
                 });
             });
+
             it("should return a 401 status and error message when username is missing", () => {
                 return request(api)
                   .post("/api/users")
@@ -246,7 +276,9 @@ describe("Users endpoint", () => {
                   });
             });
         });
+
         describe("when credentials are incorrect", () => {
+
             it("should return a 401 status and error message when username is incorrect", () => {
                 return request(api)
                   .post("/api/users")
@@ -262,6 +294,7 @@ describe("Users endpoint", () => {
                       code: 401
                   });
             });
+
             it("should return a 401 status and error message when password is incorrect", () => {
                 return request(api)
                   .post("/api/users")
@@ -278,64 +311,28 @@ describe("Users endpoint", () => {
                   });
             });
         });
+
         describe("when credentials are correct", () => {
-            it("should return a 200 status and a generated token", () => {
-            return request(api)
-                .post("/api/users")
-                .send({
+
+            it("should return a 200 status and a generated token", async () => {
+              const res = await request(api)
+                  .post("/api/users")
+                  .send({
                     username: "testuser1",
                     password: "TestPW123!",
-                })
-                .expect(200)
-                .then((res) => {
+                  })
+                  .expect(200);
                 expect(res.body.success).to.be.true;
                 expect(res.body.token).to.not.be.undefined;
-                });
             });
-        });
-    });
-  });
-
-  describe("GET /api/users ", () => {
-    before(async () => {
-        return request(api)
-            .post("/api/users?action=register")
-            .send({
-                username: "testuser2",
-                password: "SecondTestPW123!"
-              })
-              .expect(201)
-              .expect({ msg: "Successfully created new user.", code: 201 });
-    });
-    it("should return the 2 added users and a status 200", (done) => {
-        request(api)
-        .get("/api/users")
-        .set("Accept", "application/json")
-        .expect("Content-Type", /json/)
-        .expect(200)
-        .end((err, res) => {
-          expect(res.body).to.be.a("array");
-          expect(res.body.length).to.equal(2);
-          let result = res.body.map((user) => user.username);
-          expect(result).to.have.members(["testuser1", "testuser2"]);
-          done();
         });
     });
   });
 
   describe("PUT /api/users/:username ", () => {
-    before(async () => {
-        return request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200)
-            .then((res) => {
-              const result = res.body.map((user) => user.username);
-              expect(result).includes("testuser1");
-            });
-    });
+
     describe("when password is missing", () => {
+
         it("should return a 404 status and error message", () => {
           return request(api)
             .put("/api/users/testuser1")
@@ -350,7 +347,9 @@ describe("Users endpoint", () => {
             });
         });
     });
+
     describe("when password is valid", () => {
+
         it("should return a 200 status and confirmation message", () => {
           return request(api)
             .put("/api/users/testuser1")
@@ -365,8 +364,30 @@ describe("Users endpoint", () => {
                 code: 200
             });
         });
-        it("should fail log in with old password", () => {
-            return request(api)
+
+        describe("logging in after update", () => {
+          beforeEach(async () => {
+            try {
+              //Update Password
+              await request(api)
+                .put("/api/users/testuser1")
+                .send({
+                    password: "NewPW456?"
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(200)
+                .expect({
+                    msg: 'User Updated Sucessfully',
+                    code: 200
+                });
+            } catch (err) {
+              console.error(`failed to update user password: ${err}`);
+            }
+          });
+
+          it("should fail log in with old password", () => {
+              return request(api)
                 .post("/api/users")
                 .send({
                     username: "testuser1",
@@ -379,20 +400,20 @@ describe("Users endpoint", () => {
                     msg: 'Authentication failed. Wrong password.',
                     code: 401
                 });
-        });
-        it("should log in successfully with new password", () => {
-            return request(api)
-                .post("/api/users")
-                .send({
-                    username: "testuser1",
-                    password: "NewPW456?"
-                })
-                .expect(200)
-                .then((res) => {
-                expect(res.body.success).to.be.true;
-                expect(res.body.token).to.not.be.undefined;
-                });
-        });
+          });
+
+          it("should log in successfully with new password", async () => {
+            const res = await request(api)
+              .post("/api/users")
+              .send({
+                username: "testuser1",
+                password: "NewPW456?"
+              })
+              .expect(200);
+            expect(res.body.success).to.be.true;
+            expect(res.body.token).to.not.be.undefined;
+          });
+      });
     });
   });
 });
