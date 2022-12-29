@@ -5,9 +5,13 @@ import MovieSchema from "../../../../api/movies/movieModel";
 import movieDetailsModel from "../../../../api/movies/movieDetailsModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
+import { getMovies, getUpcomingMovies, getTrendingMovies, getMovie, getMovieImages } from "../../../../api/tmdb/tmdb-api";
 
 const expect = chai.expect;
 let db;
+let tmdbMovies;
+let tmdbMovie;
+let tmdbMovieImages;
 
 describe("Movies endpoint", () => {
 
@@ -40,6 +44,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete discover movie data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovies = await getMovies();
     });
 
     it("should return 20 movies and a status 200", (done) => {
@@ -54,6 +61,29 @@ describe("Movies endpoint", () => {
           done();
         });
     });
+
+    it("should return the same movies pulled from TMDB API", (done) => {
+      request(api)
+        .get("/api/movies/discover")
+        .set("Accept", "application/json")
+        .end((err, res) => {
+          expect(res.body.results).to.deep.equal(tmdbMovies.results);
+          done();
+        });
+    });
+
+    it("should update the DB", async () => {
+      await request(api)
+        .get("/api/movies/discover")
+        .set("Accept", "application/json")
+
+      const movieModel = mongoose.model('Movies', MovieSchema);
+      //Confirm all movies pulled from the TMDB API are now in the DB        
+      for (const movie of tmdbMovies.results) {
+        const foundMovie = await movieModel.findByMovieDBId(movie.id);
+        expect(foundMovie.title).to.deep.equal(movie.title);
+      }
+    });
   });
 
   describe("GET /api/movies/upcoming", () => {
@@ -65,6 +95,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete upcoming movie data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovies = await getUpcomingMovies();
     });
 
     it("should return 20 movies and a status 200", (done) => {
@@ -79,6 +112,29 @@ describe("Movies endpoint", () => {
           done();
         });
     });
+
+    it("should return the same movies pulled from TMDB API", (done) => {
+      request(api)
+        .get("/api/movies/upcoming")
+        .set("Accept", "application/json")
+        .end((err, res) => {
+          expect(res.body.results).to.deep.equal(tmdbMovies.results);
+          done();
+        });
+    });
+
+    it("should update the DB", async () => {
+      await request(api)
+        .get("/api/movies/upcoming")
+        .set("Accept", "application/json");
+
+      const upcomingMovieModel = mongoose.model('UpcomingMovie', MovieSchema);
+      //Confirm all movies pulled from the TMDB API are now in the DB
+      for (const movie of tmdbMovies.results) {
+        const foundMovie = await upcomingMovieModel.findByMovieDBId(movie.id);
+        expect(foundMovie.title).to.deep.equal(movie.title);
+      }
+    });
   });
 
   describe("GET /api/movies/trending/week", () => {
@@ -90,6 +146,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete trending (weekly) movie data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovies = await getTrendingMovies("week");
     });
 
     it("should return 20 movies and a status 200", (done) => {
@@ -104,6 +163,29 @@ describe("Movies endpoint", () => {
           done();
         });
     });
+
+    it("should return the same movies pulled from TMDB API", (done) => {
+      request(api)
+        .get("/api/movies/trending/week")
+        .set("Accept", "application/json")
+        .end((err, res) => {
+          expect(res.body.results).to.deep.equal(tmdbMovies.results);
+          done();
+        });
+    });
+
+    it("should update the DB", async () => {
+      await request(api)
+        .get("/api/movies/trending/week")
+        .set("Accept", "application/json");
+
+      const trendingWeekMovieModel = mongoose.model('WeeklyTrendingMovie', MovieSchema);
+      //Confirm all movies pulled from the TMDB API are now in the DB
+      for (const movie of tmdbMovies.results) {
+        const foundMovie = await trendingWeekMovieModel.findByMovieDBId(movie.id);
+        expect(foundMovie.title).to.deep.equal(movie.title);
+      }
+    });
   });
 
   describe("GET /api/movies/trending/today", () => {
@@ -115,6 +197,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete trending (daily) movie data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovies = await getTrendingMovies("day");
     });
 
     it("should return 20 movies and a status 200", (done) => {
@@ -129,6 +214,29 @@ describe("Movies endpoint", () => {
           done();
         });
     });
+
+    it("should return the same movies pulled from TMDB API", (done) => {
+      request(api)
+        .get("/api/movies/trending/today")
+        .set("Accept", "application/json")
+        .end((err, res) => {
+          expect(res.body.results).to.deep.equal(tmdbMovies.results);
+          done();
+        });
+    });
+
+    it("should update the DB", async () => {
+      await request(api)
+        .get("/api/movies/trending/today")
+        .set("Accept", "application/json");
+
+      const trendingDayMovieModel = mongoose.model('DailyTrendingMovie', MovieSchema);
+      //Confirm all movies pulled from the TMDB API are now in the DB
+      for (const movie of tmdbMovies.results) {
+        const foundMovie = await trendingDayMovieModel.findByMovieDBId(movie.id);
+        expect(foundMovie.title).to.deep.equal(movie.title);
+      }
+    });
   });
 
   describe("GET /api/movies/:id", () => {
@@ -139,6 +247,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete movie details data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovie = await getMovie(movies[0].id);
     });
 
     describe("when the id is valid", () => {
@@ -150,6 +261,27 @@ describe("Movies endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(200);
         expect(res.body).to.have.property("title", movies[0].title);
+      });
+
+      it("should return the same movie pulled from TMDB API", (done) => {
+        request(api)
+          .get(`/api/movies/${movies[0].id}`)
+          .set("Accept", "application/json")
+          .end((err, res) => {
+            expect(res.body.title).to.deep.equal(tmdbMovie.title);
+            expect(res.body.id).to.deep.equal(tmdbMovie.id);
+            done();
+          });
+      });
+  
+      it("should update the DB", async () => {
+        await request(api)
+          .get(`/api/movies/${movies[0].id}`)
+          .set("Accept", "application/json");
+
+        //Confirm movie pulled from the TMDB API is now in the DB
+        const foundMovie = await movieDetailsModel.findByMovieDBId(tmdbMovie.id);
+        expect(foundMovie.title).to.deep.equal(tmdbMovie.title);
       });
     });
 
@@ -164,6 +296,16 @@ describe("Movies endpoint", () => {
             expect(res.text).to.match(/Hey!! You caught the error 👍👍\. Here's the details: /);
           });
       });
+
+      it("should not update the DB", async () => {
+        await request(api)
+          .get("/api/movies/1234567899999")
+          .set("Accept", "application/json");
+
+        //Confirm invalid movie ID has not been added to the DB
+        const foundMovie = await movieDetailsModel.findByMovieDBId(1234567899999);
+        expect(foundMovie).to.be.null;
+      });
     });
   });
 
@@ -175,9 +317,13 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete movie details data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovieImages = await getMovieImages(movies[0].id);
     });
 
     describe("when the movie hasn't been called previously", () => {
+
       it("should return an error message", async () => {
         return request(api)
           .get(`/api/movies/${movies[0].id}/images`)
@@ -188,6 +334,16 @@ describe("Movies endpoint", () => {
             message: 'The resource you requested could not be found.',
             status_code: 404
           });
+      });
+
+      it("should not update the DB", async () => {
+        await request(api)
+          .get(`/api/movies/${movies[0].id}/images`)
+          .set("Accept", "application/json");
+      
+        // Confirm movie images pulled from the TMDB API is now in the DB
+        const foundMovie = await movieDetailsModel.findByMovieDBId(movies[0].id);
+        expect(foundMovie).to.be.null;
       });
     });
 
@@ -211,6 +367,28 @@ describe("Movies endpoint", () => {
             .expect("Content-Type", /json/)
             .expect(200);
           expect(res.body.backdrops).to.be.a("array");
+        });
+
+        it("should return the same movie images pulled from TMDB API", (done) => {
+          request(api)
+            .get(`/api/movies/${movies[0].id}/images`)
+            .set("Accept", "application/json")
+            .end((err, res) => {
+              expect(res.body).to.deep.equal(tmdbMovieImages);
+              done();
+            });
+        });
+    
+        it("should update the DB", async () => {
+          await request(api)
+            .get(`/api/movies/${movies[0].id}/images`)
+            .set("Accept", "application/json");
+        
+          // Confirm movie images pulled from the TMDB API is now in the DB
+          const foundMovie = await movieDetailsModel.findByMovieDBId(movies[0].id);
+          foundMovie.images.toObject().backdrops.forEach((image, index) => {
+            expect(image.poster_path).to.deep.equal(tmdbMovieImages.backdrops[index].poster_path);
+          });
         });
       });
 
