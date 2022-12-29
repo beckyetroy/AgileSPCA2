@@ -29,11 +29,25 @@ router.get('/:id', asyncHandler(async (req, res) => {
 router.post('/:id', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const review = req.body;
+    const tmdbReviews = await getMovieReviews(id);
     const movie = await movieDetailsModel.findByMovieDBId(id);
-    if (movie) {
+    if (movie && !movie.reviews.length) {
+        tmdbReviews.push(review);
         try {
-            movie.reviews.push(review);
-            movie.save();
+            movie.reviews = tmdbReviews;
+            await movie.save();
+            console.info(`movie review successfully added.`);
+        } catch (err) {
+            console.error(`failed to handle movie review data: ${err}`);
+        }
+        res.status(200).json(tmdbReviews);
+    }
+    else if (movie && movie.reviews.length) {
+        try {
+            const allReviews = movie.reviews;
+            allReviews.push(review);
+            movie.reviews = allReviews;
+            await movie.save();
             console.info(`movie review successfully added.`);
         } catch (err) {
             console.error(`failed to handle movie review data: ${err}`);
