@@ -5,12 +5,13 @@ import MovieSchema from "../../../../api/movies/movieModel";
 import movieDetailsModel from "../../../../api/movies/movieDetailsModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
-import { getMovies, getUpcomingMovies, getTrendingMovies, getMovie } from "../../../../api/tmdb/tmdb-api";
+import { getMovies, getUpcomingMovies, getTrendingMovies, getMovie, getMovieImages } from "../../../../api/tmdb/tmdb-api";
 
 const expect = chai.expect;
 let db;
 let tmdbMovies;
 let tmdbMovie;
+let tmdbMovieImages;
 
 describe("Movies endpoint", () => {
 
@@ -316,6 +317,9 @@ describe("Movies endpoint", () => {
       } catch (err) {
         console.error(`failed to delete movie details data: ${err}`);
       }
+
+      //Store output from the TMDB API call directly
+      tmdbMovieImages = await getMovieImages(movies[0].id);
     });
 
     describe("when the movie hasn't been called previously", () => {
@@ -330,6 +334,16 @@ describe("Movies endpoint", () => {
             message: 'The resource you requested could not be found.',
             status_code: 404
           });
+      });
+
+      it("should not update the DB", async () => {
+        await request(api)
+          .get(`/api/movies/${movies[0].id}/images`)
+          .set("Accept", "application/json");
+      
+        // Confirm movie images pulled from the TMDB API is now in the DB
+        const foundMovie = await movieDetailsModel.findByMovieDBId(movies[0].id);
+        expect(foundMovie).to.be.null;
       });
     });
 
@@ -353,6 +367,28 @@ describe("Movies endpoint", () => {
             .expect("Content-Type", /json/)
             .expect(200);
           expect(res.body.backdrops).to.be.a("array");
+        });
+
+        it("should return the same movie images pulled from TMDB API", (done) => {
+          request(api)
+            .get(`/api/movies/${movies[0].id}/images`)
+            .set("Accept", "application/json")
+            .end((err, res) => {
+              expect(res.body).to.deep.equal(tmdbMovieImages);
+              done();
+            });
+        });
+    
+        it("should update the DB", async () => {
+          await request(api)
+            .get(`/api/movies/${movies[0].id}/images`)
+            .set("Accept", "application/json");
+        
+          // Confirm movie images pulled from the TMDB API is now in the DB
+          const foundMovie = await movieDetailsModel.findByMovieDBId(movies[0].id);
+          foundMovie.images.toObject().backdrops.forEach((image, index) => {
+            expect(image.poster_path).to.deep.equal(tmdbMovieImages.backdrops[index].poster_path);
+          });
         });
       });
 
