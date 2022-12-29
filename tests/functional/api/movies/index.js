@@ -283,6 +283,21 @@ describe("Movies endpoint", () => {
         const foundMovie = await movieDetailsModel.findByMovieDBId(tmdbMovie.id);
         expect(foundMovie.title).to.deep.equal(tmdbMovie.title);
       });
+
+      it("should only update the DB once", async () => {
+        await request(api)
+          .get(`/api/movies/${movies[0].id}`)
+          .set("Accept", "application/json");
+        
+        //Make another request
+        await request(api)
+          .get(`/api/movies/${movies[0].id}`)
+          .set("Accept", "application/json");
+
+        //Confirm there is still only 1 movie details matching the movie ID in the DB
+        const detailsCount = await movieDetailsModel.count({ id: movies[0].id });
+        expect(detailsCount).to.equal(1);
+      });
     });
 
     describe("when the id is invalid", () => {
