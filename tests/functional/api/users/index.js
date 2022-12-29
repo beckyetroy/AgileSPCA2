@@ -63,19 +63,16 @@ describe("Users endpoint", () => {
 
   describe("GET /api/users ", () => {
 
-    it("should return the 2 added users and a status 200", (done) => {
-        request(api)
+    it("should return the 2 added users and a status 200", async () => {
+      const res = await request(api)
         .get("/api/users")
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
-        .expect(200)
-        .end((err, res) => {
-          expect(res.body).to.be.a("array");
-          expect(res.body.length).to.equal(2);
-          let result = res.body.map((user) => user.username);
-          expect(result).to.have.members(["testuser1", "testuser2"]);
-          done();
-        });
+        .expect(200);
+      expect(res.body).to.be.a("array");
+      expect(res.body.length).to.equal(2);
+      let result = res.body.map((user) => user.username);
+      expect(result).to.have.members(["testuser1", "testuser2"]);
     });
   });
 
@@ -96,22 +93,22 @@ describe("Users endpoint", () => {
               expect(result).to.have.members(["testuser1", "testuser2"]);
             });
 
-            it("should return a 401 status and error message when all details are missing", () => {
-                return request(api)
-                  .post("/api/users?action=register")
-                  .send({
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Please pass username and password.',
-                      success: false
-                  });
-              });
+            it("should return a 401 status and error message when all details are missing", async () => {
+              await request(api)
+                .post("/api/users?action=register")
+                .send({
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Please pass username and password.',
+                    success: false
+                });
+            });
 
-            it("should return a 401 status and error message when password is missing", () => {
-              return request(api)
+            it("should return a 401 status and error message when password is missing", async () => {
+              await request(api)
                 .post("/api/users?action=register")
                 .send({
                   username: "testuser3"
@@ -125,8 +122,8 @@ describe("Users endpoint", () => {
                 });
             });
 
-            it("should return a 401 status and error message when username is missing", () => {
-              return request(api)
+            it("should return a 401 status and error message when username is missing", async () => {
+              await request(api)
                 .post("/api/users?action=register")
                 .send({
                   password: "ThirdTestPW123!"
@@ -154,8 +151,8 @@ describe("Users endpoint", () => {
               expect(result).to.have.members(["testuser1", "testuser2"]);
           });
 
-        it("should return a 401 status and error message", () => {
-          return request(api)
+        it("should return a 401 status and error message", async () => {
+          await request(api)
             .post("/api/users?action=register")
             .send({
               username: "testuser3",
@@ -184,8 +181,8 @@ describe("Users endpoint", () => {
           expect(result).to.have.members(["testuser1", "testuser2", "testuser3"]);
         });
 
-        it("should return a 201 status and the confirmation message", () => {
-          return request(api)
+        it("should return a 201 status and the confirmation message", async () => {
+          await request(api)
             .post("/api/users?action=register")
             .send({
               username: "testuser3",
@@ -210,8 +207,8 @@ describe("Users endpoint", () => {
           expect(result).to.have.members(["testuser1", "testuser2"]);
         });
 
-        it("should return a 401 status and error message", () => {
-          return request(api)
+        it("should return a 401 status and error message", async () => {
+          await request(api)
             .post("/api/users?action=register")
             .send({
               username: "testuser1",
@@ -232,22 +229,22 @@ describe("Users endpoint", () => {
 
         describe("when credentials are missing", () => {
 
-            it("should return a 401 status and error message when all details are missing", () => {
-                return request(api)
-                  .post("/api/users")
-                  .send({
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Please pass username and password.',
-                      success: false
-                  });
+            it("should return a 401 status and error message when all details are missing", async () => {
+              await request(api)
+                .post("/api/users")
+                .send({
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Please pass username and password.',
+                    success: false
+                });
             });
 
-            it("should return a 401 status and error message when password is missing", () => {
-              return request(api)
+            it("should return a 401 status and error message when password is missing", async () => {
+              await request(api)
                 .post("/api/users")
                 .send({
                   username: "testuser1"
@@ -261,54 +258,54 @@ describe("Users endpoint", () => {
                 });
             });
 
-            it("should return a 401 status and error message when username is missing", () => {
-                return request(api)
-                  .post("/api/users")
-                  .send({
-                    password: "TestPW123!"
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Please pass username and password.',
-                      success: false
-                  });
+            it("should return a 401 status and error message when username is missing", async () => {
+              await request(api)
+                .post("/api/users")
+                .send({
+                  password: "TestPW123!"
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Please pass username and password.',
+                    success: false
+                });
             });
         });
 
         describe("when credentials are incorrect", () => {
 
-            it("should return a 401 status and error message when username is incorrect", () => {
-                return request(api)
-                  .post("/api/users")
-                  .send({
-                    username: "fakeusername",
-                    password: "TestPW123!"
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Authentication failed. User not found.',
-                      code: 401
-                  });
+            it("should return a 401 status and error message when username is incorrect", async () => {
+              await request(api)
+                .post("/api/users")
+                .send({
+                  username: "fakeusername",
+                  password: "TestPW123!"
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Authentication failed. User not found.',
+                    code: 401
+                });
             });
 
-            it("should return a 401 status and error message when password is incorrect", () => {
-                return request(api)
-                  .post("/api/users")
-                  .send({
-                    username: "testuser1",
-                    password: "FakePW123!"
-                  })
-                  .set("Accept", "application/json")
-                  .expect("Content-Type", /json/)
-                  .expect(401)
-                  .expect({
-                      msg: 'Authentication failed. Wrong password.',
-                      code: 401
-                  });
+            it("should return a 401 status and error message when password is incorrect", async () => {
+              await request(api)
+                .post("/api/users")
+                .send({
+                  username: "testuser1",
+                  password: "FakePW123!"
+                })
+                .set("Accept", "application/json")
+                .expect("Content-Type", /json/)
+                .expect(401)
+                .expect({
+                    msg: 'Authentication failed. Wrong password.',
+                    code: 401
+                });
             });
         });
 
@@ -333,8 +330,8 @@ describe("Users endpoint", () => {
 
     describe("when password is missing", () => {
 
-        it("should return a 404 status and error message", () => {
-          return request(api)
+        it("should return a 404 status and error message", async () => {
+          await request(api)
             .put("/api/users/testuser1")
             .send({
             })
@@ -350,8 +347,8 @@ describe("Users endpoint", () => {
 
     describe("when password is valid", () => {
 
-        it("should return a 200 status and confirmation message", () => {
-          return request(api)
+        it("should return a 200 status and confirmation message", async () => {
+          await request(api)
             .put("/api/users/testuser1")
             .send({
                 password: "NewPW456?"
@@ -386,20 +383,20 @@ describe("Users endpoint", () => {
             }
           });
 
-          it("should fail log in with old password", () => {
-              return request(api)
-                .post("/api/users")
-                .send({
-                    username: "testuser1",
-                    password: "TestPW123!"
-                })
-                .set("Accept", "application/json")
-                .expect("Content-Type", /json/)
-                .expect(401)
-                .expect({
-                    msg: 'Authentication failed. Wrong password.',
-                    code: 401
-                });
+          it("should fail log in with old password", async () => {
+            await request(api)
+              .post("/api/users")
+              .send({
+                  username: "testuser1",
+                  password: "TestPW123!"
+              })
+              .set("Accept", "application/json")
+              .expect("Content-Type", /json/)
+              .expect(401)
+              .expect({
+                  msg: 'Authentication failed. Wrong password.',
+                  code: 401
+              });
           });
 
           it("should log in successfully with new password", async () => {
