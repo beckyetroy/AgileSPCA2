@@ -31,7 +31,7 @@ router.get('/movie/:id/credits', asyncHandler(async (req, res) => {
 router.get('/:id', asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     const person = await getPersonDetails(id);
-    if (person) {
+    if (person.name) {
         try {
             let personStored = await personModel.findByPersonDBId(id);
             if (personStored) {
