@@ -28,10 +28,8 @@ describe("Users endpoint", () => {
   beforeEach(async () => {
     try {
       await User.deleteMany();
-    } catch (err) {
-      console.error(`failed to delete user data: ${err}`);
-    }
-    try {
+
+      //Register 2 users
       await request(api)
         .post("/api/users?action=register")
         .send({
@@ -40,10 +38,7 @@ describe("Users endpoint", () => {
         })
         .expect(201)
         .expect({ msg: "Successfully created new user.", code: 201 });
-    } catch (err) {
-      console.error(`failed to register user data: ${err}`);
-    }
-    try {
+
       await request(api)
         .post("/api/users?action=register")
         .send({
@@ -53,7 +48,7 @@ describe("Users endpoint", () => {
         .expect(201)
         .expect({ msg: "Successfully created new user.", code: 201 });
     } catch (err) {
-      console.error(`failed to register user data: ${err}`);
+      console.error(`failed to Load user test Data: ${err}`);
     }
   });
 
@@ -89,6 +84,30 @@ describe("Users endpoint", () => {
         expect(foundUser.username).to.deep.equal(user);
       }
     });
+
+    it("should not return plaintext passwords in DB or API", async () => {
+      //Plaintext passwords (from before hook)
+      let passwords = ['TestPW123!', 'SecondTestPW456?'];
+
+      const res = await request(api)
+        .get("/api/users")
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200);
+
+      //Compare password data returned by API to plaintext
+      let passwordsReturnedAPI = res.body.map((user) => user.password);
+      expect(passwords).to.not.deep.equal(passwordsReturnedAPI);
+
+      //Compare password data returned by DB to plaintext
+      let usernames = res.body.map((user) => user.username);
+      let passwordsReturnedDB = [];
+      for (const user of usernames) {
+        const foundUser = await User.findByUserName(user);
+        passwordsReturnedDB.push(foundUser.password);
+      }
+      expect(passwords).to.not.deep.equal(passwordsReturnedDB);
+    });
   });
 
   describe("POST /api/users ", () => {
@@ -96,18 +115,6 @@ describe("Users endpoint", () => {
     describe("For registering", () => {
 
         describe("when credentials are missing", () => {
-
-            afterEach(async () => {
-              //Confirm still only 2 users from before hook are returned
-              const res = await request(api)
-                .get("/api/users")
-                .set("Accept", "application/json")
-                .expect("Content-Type", /json/)
-                .expect(200);
-              expect(res.body.length).to.equal(2);
-              const result = res.body.map((user) => user.username);
-              expect(result).to.have.members(["testuser1", "testuser2"]);
-            });
 
             describe("when all details are missing", () => {
 
@@ -180,18 +187,6 @@ describe("Users endpoint", () => {
 
         describe("when password is invalid", () => {
 
-          afterEach(async () => {
-            //Confirm still only 2 users from before hook are returned
-            const res = await request(api)
-              .get("/api/users")
-              .set("Accept", "application/json")
-              .expect("Content-Type", /json/)
-              .expect(200);
-            expect(res.body.length).to.equal(2);
-            const result = res.body.map((user) => user.username);
-            expect(result).to.have.members(["testuser1", "testuser2"]);
-          });
-
           it("should return a 401 status and error message", async () => {
             await request(api)
               .post("/api/users?action=register")
@@ -227,24 +222,6 @@ describe("Users endpoint", () => {
 
       describe("when credentials are valid", () => {
 
-        afterEach(async () => {
-          //Check that created user is now returned
-          const res = await request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200);
-          expect(res.body.length).to.equal(3);
-          const usernames = res.body.map((user) => user.username);
-          expect(usernames).to.have.members(["testuser1", "testuser2", "testuser3"]);
-
-          //Confirm usernames returned, including new user, are stored in the DB
-          for (const user of usernames) {
-            const foundUser = await User.findByUserName(user);
-            expect(foundUser.username).to.deep.equal(user);
-          }
-        });
-
         it("should return a 201 status and the confirmation message", async () => {
           await request(api)
             .post("/api/users?action=register")
@@ -265,24 +242,32 @@ describe("Users endpoint", () => {
             })
             .expect(201)
 
+          //Confirm all 3 test users are now stored in the DB
+          const usernames = ["testuser1", "testuser2", "testuser3"];
+
+          for (const user of usernames) {
+            const foundUser = await User.findByUserName(user);
+            expect(foundUser.username).to.deep.equal(user);
+          }
+        });
+
+        it("should not store plaintext password in DB", async () => {
+          await request(api)
+            .post("/api/users?action=register")
+            .send({
+              username: "testuser3",
+              password: "ThirdTestPW123!",
+            })
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(201)
+    
           const foundUser = await User.findByUserName("testuser3");
-          expect(foundUser.username).to.deep.equal("testuser3");
+          expect(foundUser.password).to.not.deep.equal("ThirdTestPW123!");
         });
       });
   
       describe("when username already exists", () => {
-
-        afterEach(async () => {
-          //Confirm still only 2 users from before hook are returned
-          const res = await request(api)
-            .get("/api/users")
-            .set("Accept", "application/json")
-            .expect("Content-Type", /json/)
-            .expect(200);
-          expect(res.body.length).to.equal(2);
-          const result = res.body.map((user) => user.username);
-          expect(result).to.have.members(["testuser1", "testuser2"]);
-        });
 
         it("should return a 401 status and error message", async () => {
           await request(api)
@@ -451,6 +436,19 @@ describe("Users endpoint", () => {
                 msg: 'User Updated Sucessfully',
                 code: 200
             });
+        });
+
+        it("should not store plaintext password in DB", async () => {
+          await request(api)
+            .put("/api/users/testuser1")
+            .send({
+                password: "NewPW456?"
+            })
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+          const foundUser = await User.findByUserName("testuser1");
+          expect(foundUser.password).to.not.deep.equal("NewPW456?");
         });
 
         describe("logging in after update", () => {
