@@ -21,7 +21,7 @@ stages:
   - install
   - build
   - test
-  - staging
+  - deploy
 
 # Jobs:
 
@@ -44,9 +44,7 @@ test_api:
 
 deploy_staging:
   image: ruby:latest
-  only:
-    - develop
-  stage: staging
+  stage: deploy
   before_script:
     - apt-get update -qy
     - apt-get install -y ruby-dev
@@ -54,3 +52,16 @@ deploy_staging:
   script:  
     - dpl --provider=heroku --app=$HEROKU_APP_NAME_STAGING --api-key=$HEROKU_API_KEY
     - echo "Deployed to staging server"
+
+deploy_production:
+  image: ruby:latest
+  stage: deploy
+  only:
+    - main
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+  script:  
+    - dpl --provider=heroku --app=$HEROKU_APP_NAME_PRODUCTION --api-key=$HEROKU_API_KEY
+    - echo "Deployed to production server"
