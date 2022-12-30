@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 import User from "../../../../api/users/userModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
+import loglevel from 'loglevel';
 
 const expect = chai.expect;
 let db;
@@ -22,7 +23,7 @@ describe("Users endpoint", () => {
     try {
       await db.dropDatabase();
     } catch (error) {
-      console.log(error);
+      loglevel.error(error);
     }
   });
 
@@ -49,7 +50,7 @@ describe("Users endpoint", () => {
         .expect(201)
         .expect({ msg: "Successfully created new user.", code: 201 });
     } catch (err) {
-      console.error(`failed to Load user test Data: ${err}`);
+      loglevel.error(`failed to Load user test Data: ${err}`);
     }
   });
 
@@ -469,7 +470,7 @@ describe("Users endpoint", () => {
                     code: 200
                 });
             } catch (err) {
-              console.error(`failed to update user password: ${err}`);
+              loglevel.error(`failed to update user password: ${err}`);
             }
           });
 
@@ -516,7 +517,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add favourite: ${err}`);
+        loglevel.error(`failed to add favourite: ${err}`);
       }
     });
 
@@ -575,7 +576,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add favourite: ${err}`);
+        loglevel.error(`failed to add favourite: ${err}`);
       }
     });
 
@@ -653,7 +654,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add favourite: ${err}`);
+        loglevel.error(`failed to add favourite: ${err}`);
       }
     });
 
@@ -769,7 +770,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add must watch: ${err}`);
+        loglevel.error(`failed to add must watch: ${err}`);
       }
     });
 
@@ -828,7 +829,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add must watch movie: ${err}`);
+        loglevel.error(`failed to add must watch movie: ${err}`);
       }
     });
 
@@ -907,7 +908,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add must watch movie: ${err}`);
+        loglevel.error(`failed to add must watch movie: ${err}`);
       }
     });
 
@@ -921,7 +922,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add must watch movie: ${err}`);
+        loglevel.error(`failed to add must watch movie: ${err}`);
       }
     });
 

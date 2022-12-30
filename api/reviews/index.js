@@ -2,6 +2,7 @@ import express from 'express';
 import { getMovieReviews } from '../tmdb/tmdb-api';
 import movieDetailsModel from '../movies/movieDetailsModel';
 import asyncHandler from 'express-async-handler';
+import loglevel from 'loglevel';
 
 const router = express.Router();
 
@@ -13,9 +14,9 @@ router.get('/:id', asyncHandler(async (req, res) => {
         try {
             movie.reviews = reviews;
             movie.save();
-            console.info(`movie reviews successfully stored.`);
+            loglevel.info(`movie reviews successfully stored.`);
         } catch (err) {
-            console.error(`failed to handle movie reviews data: ${err}`);
+            loglevel.error(`failed to handle movie reviews data: ${err}`);
         }
         res.status(200).json(reviews);
     } else if (movie && movie.reviews.length) {
@@ -36,9 +37,9 @@ router.post('/:id', asyncHandler(async (req, res) => {
         try {
             movie.reviews = tmdbReviews;
             await movie.save();
-            console.info(`movie review successfully added.`);
+            loglevel.info(`movie review successfully added.`);
         } catch (err) {
-            console.error(`failed to handle movie review data: ${err}`);
+            loglevel.error(`failed to handle movie review data: ${err}`);
         }
         res.status(200).json(tmdbReviews);
     }
@@ -48,9 +49,9 @@ router.post('/:id', asyncHandler(async (req, res) => {
             allReviews.push(review);
             movie.reviews = allReviews;
             await movie.save();
-            console.info(`movie review successfully added.`);
+            loglevel.info(`movie review successfully added.`);
         } catch (err) {
-            console.error(`failed to handle movie review data: ${err}`);
+            loglevel.error(`failed to handle movie review data: ${err}`);
         }
         res.status(200).json(movie.reviews);
     } else {

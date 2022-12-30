@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import loglevel from 'loglevel';
 
 dotenv.config();
 
@@ -35,7 +36,7 @@ export const start = () => {
         client_id: clientId,
       });
     } else {
-      console.info(clientId);
+      loglevel.info(clientId);
     }
   });
 }

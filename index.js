@@ -10,6 +10,13 @@ import reviewsRouter from './api/reviews';
 import googleRouter from './google-api';
 import './db';
 import './seedData';
+import loglevel from 'loglevel';
+
+if (process.env.NODE_ENV === 'test') {
+  loglevel.setLevel('warn')
+  } else {
+  loglevel.setLevel('info')
+}
 
 dotenv.config();
 
@@ -38,6 +45,6 @@ app.use('/api/users', usersRouter);
 app.use(errHandler);
 
 let server = app.listen(port, () => {
-  console.info(`Server running at ${port}`);
+  loglevel.info(`Server running at ${port}`);
 });
 module.exports = server
