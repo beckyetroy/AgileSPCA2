@@ -1,79 +1,12 @@
-# Assignment 2 - Web API.
+# Assignment 2 - Agile Software Practice.
 
 Name: Rebecca Troy
 
-## Features.
+## API endpoints.
 
-This section details the features that have been added to the application as part of CA2, as well as the pre-existing features that have been modified.
-
- + React Web App fully integrated with the Node API. All Calls to the TMDB API are done through the Node API.
- + Fully integrated with MongoDB
- + Log In functionality
-      + New view
-      + With advanced error checking and detailed error messages on failure
-      + Custom site header to include username on log in
-      + Access to favourites, must watch, manage account, and reviews feature on successful log in
- + Registration functionality
-      + New view
-      + With advanced error checking and  detailed error messages on failure
- + MongoDB schemas and documents for all movies, movie details, people, movie credits, and users handled.
-     + Movie details schema is a nested document with movie reviews and images.
-     + Users schema is also a nested document with lists of the users' favourite and must watch movies (as movie objects)
- + Reviews posted by the user are added to the DB and can be seen immediately in the web app (reviews list and reviews details page)
- + Favourites / must watch persistence after sign out (due to MongoDB integration)
- + Manage Account page with the following functionality:
-     + User sign out
-     + User change password
- + Improved UX (confirmation on removal of favourite or must watch, on successful registration and on successful log out)
- + Sign in with Google API partially implemented
-
-## Setup requirements.
-
-No additional steps are required to run this app locally.
-First, run the below commands from within the **movies-api** directory to start the Node API:
-```
-npm install
-npm run dev
-```
-
-Then follow the below commands from within the **movies-react-app** repo directory to start the app:
-
-```
-npm install
-npm start
-```
-
-## API Configuration
-
-This section describes the configuration that needs to take place before running the API.
-
-### Prerequisites
-
-Before configuring the API, it is required to create a MongoDB account and cluster, which will be used for storing and retrieving data for the app.
-
-It is also recommended to create a Google Cloud Platform project and generate a Client ID and redirect URIs in order to use the Google Sign-In API code. However, as this code is not functional, this step is optional.
-
-### Configuration
-
-To run the API, an `.env` file must be created within the **movies-api** folder. The folder should contain the following variables:
-
-______________________
-NODEENV=develop
-PORT=8080
-HOST=localhost
-MONGO_DB=YourMongoURL
-SEED_DB=False 
-SECRET=YourJTWSectret
-REACT_APP_TMDB_KEY=YourTMDBKey
-GOOGLE_CLIENT_ID=YourClientID
-GOOGLE_CLIENT_SECRET=YourClientSecret
-GOOGLE_REDIRECT_URIS=YourRedirectURIS
-______________________
-
-## API Design
-This section gives an overview of the web API design. The design is as follows:
-
-### Movies:
+The Web API's endpoints are listed below, along with their purpose.
+ 
+ ### Movies:
 - /api/movies/discover | GET | Gets the most up to date list of 21 discover movies from the TMDB API and updates the values in the MongoDB
 - /api/movies/upcoming | GET | Gets the most up to date list of 21 upcoming movies from the TMDB API and updates the values in the MongoDB
 - /api/movies/trending/week | GET | Gets the most up to date list of 21 trending movies this week from the TMDB API and updates the values in the MongoDB
@@ -109,87 +42,200 @@ This section gives an overview of the web API design. The design is as follows:
 - /api/google/authenticate | POST | Pass a generated authentication code through the API in exchange for access tokens
 - api/google/signin | GET | Grants offline access to the modules to sign in can occur
 
-## Security and Authentication
+As the Google endpoint does not work as expected, it is ignored in testing.
 
-This section details the authentication and security implemented on the API.
+The API does not block routes at the server level. Instead, routes are blocked at the React-app level and therefore this is not tested for this assignment.
 
-### Authentication
+## Test cases.
 
-Authentication is carried out at the front-end (based on user input) and back-end (based on DB-compatibility) when a user registers and / or logs in.
+This section lists the reponse printed to the console when running all of the tests locally. The output is as follows:
 
-Requirements for users when creating or editing their account are:
- + Usernames must be unique
- + Passwords must be a minimum of 8 characters long with at least one uppercase letter, one lowercase letter, one number, and one special character.
+~~~
+  Users endpoint
+    GET /api/users
+      √ should return the 2 added users and a status 200
+      √ should show the same 2 users in the DB (82ms)
+      √ should not return plaintext passwords in DB or API (81ms)
+    POST /api/users
+      For registering
+        when credentials are missing
+          when all details are missing
+            √ should return a 401 status and error message
+          when password is missing
+            √ should return a 401 status and error message when password is missing
+            √ should not update the DB
+          when username is missing
+            √ should return a 401 status and error message when username is missing
+        when password is invalid
+          √ should return a 401 status and error message
+          √ should not update the DB (47ms)
+        when credentials are valid
+          √ should return a 201 status and the confirmation message (241ms)
+          √ should update the DB (349ms)
+          √ should not store plaintext password in DB (288ms)
+        when username already exists
+          √ should return a 401 status and error message
+          √ should not update the DB (61ms)
+      For logging in
+        when credentials are missing
+          √ should return a 401 status and error message when all details are missing
+          √ should return a 401 status and error message when password is missing
+          √ should return a 401 status and error message when username is missing
+        when credentials are incorrect
+          √ should return a 401 status and error message when username is incorrect
+          √ should return a 401 status and error message when password is incorrect (262ms)
+        when credentials are correct
+          √ should return a 200 status and a generated token (240ms)
+    PUT /api/users/:username
+      when password is missing
+        √ should return a 404 status and error message
+      when password is valid
+        √ should return a 200 status and confirmation message (310ms)
+        √ should not store plaintext password in DB (310ms)
+        logging in after update
+          √ should fail log in with old password (231ms)
+          √ should log in successfully with new password (267ms)
+    GET /api/users/:username/favourites
+      When username is valid
+        √ should return the user's favourites and a status 200
+        √ should show the same user favourites in the DB (56ms)
+      When username is invalid
+        √ should return an error message and status 404
+    POST /api/users/:username/favourites
+      When movie is not already favourited
+        √ should return the user, including new favourite, and a 201 status (76ms)
+        √ should update the DB (95ms)
+      When movie is already favourited
+        √ should return the user with no duplicate favourites and a 201 status
+        √ should not update the DB (101ms)
+      POST /api/users/:username/favourites?action=remove
+        When username is invalid
+          √ should return error message and 404 status
+        When username is valid
+          When movie is not favourited
+            √ should return the user's favourites, excluding removed, and a 200 status (75ms)
+            √ should not update the DB (84ms)
+          When movie is favourited
+            √ should return the user favourites without the posted favourite and a 200 status (60ms)
+            √ should update the DB (102ms)
+    GET /api/users/:username/mustwatch
+      When username is valid
+        √ should return the user's must watch movies and a status 200 (38ms)
+        √ should show the same user must watch movies in the DB (59ms)
+      When username is invalid
+        √ should return an error message and status 404 (39ms)
+    POST /api/users/:username/mustwatch
+      When movie is not already added to must watch
+        √ should return the user, including new must watch movie, and a 201 status (74ms)
+        √ should update the DB (84ms)
+      When movie is already a must watch movie
+        √ should return the user with no duplicate must watch movies and a 201 status
+        √ should not update the DB (93ms)
+    POST /api/users/:username/mustwatch?action=remove
+      When username is invalid
+        √ should return error message and 404 status
+      When username is valid
+        When movie is not a must watch movie
+          √ should return the user's must watch movies, excluding removed, and a 200 status (55ms)
+          √ should not update the DB (94ms)
+        When movie is a must watch movie
+          √ should return the user must watch movies without the posted must watch movie and a 200 status (72ms)
+          √ should update the DB (101ms)
 
-The API uses JSON web tokens upon successful user log in. A token is generated and verified by the application.
+  Movies endpoint
+    GET /api/movies/discover
+      √ should return 20 movies and a status 200 (194ms)
+      √ should return the same movies pulled from TMDB API (173ms)
+      √ should update the DB (724ms)
+    GET /api/movies/upcoming
+      √ should return 20 movies and a status 200 (225ms)
+      √ should return the same movies pulled from TMDB API (253ms)
+      √ should update the DB (788ms)
+    GET /api/movies/trending/week
+      √ should return 20 movies and a status 200 (170ms)
+      √ should return the same movies pulled from TMDB API (184ms)
+      √ should update the DB (612ms)
+    GET /api/movies/trending/today
+      √ should return 20 movies and a status 200 (214ms)
+      √ should return the same movies pulled from TMDB API (220ms)
+      √ should update the DB (681ms)
+    GET /api/movies/:id
+      when the id is valid
+        √ should return the matching movie (194ms)
+        √ should return the same movie pulled from TMDB API (154ms)
+        √ should update the DB (158ms)
+        √ should only update the DB once (315ms)
+      when the id is invalid
+        √ should return an error message (99ms)
+        √ should not update the DB (122ms)
+    GET /api/movies/:id/images
+      when the movie hasn't been called previously
+        √ should return an error message (137ms)
+        √ should not update the DB (129ms)
+      when the movie has been called previously
+        when the id is valid
+          √ should return the matching movie images (145ms)
+          √ should return the same movie images pulled from TMDB API (136ms)
+          √ should update the DB (175ms)
+        when the id is invalid
+          √ should return an error message (94ms)
 
-### Hash and Salt
+  People endpoint
+    GET /api/people/movie/:id/credits
+      √ should return an array of cast, an array of crew and a status 200 (395ms)
+      √ should return the same credits pulled from TMDB API (297ms)
+      √ should update the DB (435ms)
+      √ should only update the DB once (440ms)
+    GET /api/people/:id
+      when the id is valid
+        √ should return the matching person (174ms)
+        √ should return the same movie pulled from TMDB API (126ms)
+        √ should update the DB (187ms)
+      when the id is invalid
+        √ should return an error message (93ms)
+        √ should not update the DB (125ms)
 
-All passwords are encrypted before being stored in the DB. This includes when a user first creates their password and if the user updates then goes onto update their password. Plaintext passwords are never handled by the DB.
+  Reviews endpoint
+    GET /api/reviews/:id
+      when the movie hasn't been called previously
+        √ should return an error message (132ms)
+        √ should not update the DB (143ms)
+      when the movie has been called previously
+        when the id is valid
+          √ should return the matching movie reviews (188ms)
+          √ should return the same movie reviews pulled from TMDB API (132ms)
+          √ should update the DB (190ms)
+        when the id is invalid
+          √ should return an error message (105ms)
+    POST /api/reviews/:id
+      when the movie hasn't been called previously
+        √ should return an error message (139ms)
+        √ should not update the DB (161ms)
+      when the movie has been called previously
+        when the id is valid
+          √ should return a list of movie reviews and status 200 (278ms)
+          √ should return the same movie reviews pulled from TMDB API AND the newly added one (204ms)
+          √ should update the DB (230ms)
 
-### Protected routes
+  Genres endpoint
+    GET /api/genres
+      √ should return an array of genres (73ms)
+      √ should return the same genres pulled from TMDB API (92ms)
+  95 passing (56s)
+~~~
 
-The following routes are only accessible by verified, logged in users:
- + /account: The 'manage account' page
- + /movies/favourites: The page containing the user's favourite movies
- + /movies/mustwatch: The page containing the user's must watch movies
- + /reviews/form: The page where a user can write a review of a particular movie (accessible from the favourite's page)
+## Independent Learning
 
-## Integrating with React App
+I attempted to implement Option A i.e. manually deploying a single endpoint from the Express App into a new project to the Vercel platform as a serverless function.
 
-As mentioned above, the React app has been entirely integrated with the API. All views use the Web API rather than the TMDB API.
+The project can be found [on this repository.](https://github.com/beckyetroy/vercel-deployment),
+which also includes the link to the deployed project.
 
-This has been done by removing the /src/api/tmdb-api.js from the React App, and replacing it with /src/api/movie-api.js. This file contains all of the functions used by the React app to fetch routes from the Node API. Below is an example function:
+While the deployment succeeded and seemed to be configured as required, POSTMAN did not return
+the data as expected. Find below a screenshot of the output:
 
-```
-export const fetchMovies = async () => {
-    return fetch("/api/movies/discover", {
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        method: 'get'}).then(res => res.json())
-  };
-```
+![](./images/POSTMAN-output.png)
 
-All data displayed on the React App is called from the Web API, saved to MongoDB, and then the React App calls the data from the MongoDB. See an example function (/api/movies/{movieid}) below:
+Several different endpoints were attempted in order to get an expected output, but none were successful with POSTMAN for unknown reasons. All returned the above error.
 
-```
-router.get('/:id', asyncHandler(async (req, res) => {
-    const id = parseInt(req.params.id);
-    const movie = await getMovie(id);
-    if (movie) {
-        try {
-            let movieStored = await movieDetailsModel.findByMovieDBId(id);
-            if (movieStored) {
-                console.info(`movie details already stored.`);
-            }
-            else {
-                movieStored = await movieDetailsModel.create(movie);
-                console.info(`movie details successfully stored.`);
-            }
-            res.status(200).json(movieStored);
-          } catch (err) {
-            console.error(`failed to handle movie details data: ${err}`);
-          }
-    } else {
-        res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
-    }
-}));
-```
-
-## Independent learning (if relevant)
-
-Sign in via Google account through a 3rd party API has been partially implemented but is not functional.
-
-The following steps were carried out:
- + A Google Cloud Platform project was made with Google Sign-In API enabled
- + A client ID and consent screen was created from the Google API Console
- + A Google Sign-In button was added to the app's log in page
- + Authentication was implemented in the Node API to exchange an authorisation code for an access token
- + The access token should then authorise the user
-
-This code runs with no errors or problems, but nothing happens when the Google sign in button is pressed.
-
-This was achieved by following [this tutorial](https://developers.google.com/identity/sign-in/web/server-side-flow).
-
-See most recent commit (d0bbe2e9242a9d01471c21ba3a4f594c04dcf4a0) for full code.
+Throughout the testing code, I learned and utilised several new JavaScript and chai (expect) commands, such as .deep.equal. I learned in particular how to test the contents of a MongoDB in extensive detail.
