@@ -7,6 +7,7 @@ import api from "../../../../index";
 import movies from "../../../../seedData/movies";
 import people from "../../../../seedData/people";
 import { getPersonDetails, getMovieCredits } from "../../../../api/tmdb/tmdb-api";
+import loglevel from 'loglevel';
 
 const expect = chai.expect;
 let db;
@@ -27,7 +28,7 @@ describe("People endpoint", () => {
       try {
         await db.dropDatabase();
       } catch (error) {
-        console.log(error);
+        loglevel.error(error);
       }
     });
   
@@ -41,7 +42,7 @@ describe("People endpoint", () => {
           try {
             await creditsModel.deleteMany();
           } catch (err) {
-            console.error(`failed to delete movie credits data: ${err}`);
+            loglevel.error(`failed to delete movie credits data: ${err}`);
           }
     
           //Store output from the TMDB API call directly
@@ -109,7 +110,7 @@ describe("People endpoint", () => {
           try {
             await personModel.deleteMany();
           } catch (err) {
-            console.error(`failed to delete person data: ${err}`);
+            loglevel.error(`failed to delete person data: ${err}`);
           }
     
           //Store output from the TMDB API call directly

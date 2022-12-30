@@ -3,6 +3,7 @@ import personModel from './personModel';
 import creditsModel from './creditsModel';
 import { getMovieCredits, getPersonDetails } from '../tmdb/tmdb-api';
 import asyncHandler from 'express-async-handler';
+import loglevel from 'loglevel';
 
 const router = express.Router();
 
@@ -13,15 +14,15 @@ router.get('/movie/:id/credits', asyncHandler(async (req, res) => {
         try {
             let creditsStored = await creditsModel.findByMovieDBId(id);
             if (creditsStored) {
-                console.info(`movie credit details already stored.`);
+                loglevel.info(`movie credit details already stored.`);
             }
             else {
                 creditsStored = await creditsModel.create(credits);
-                console.info(`movie credit details successfully stored.`);
+                loglevel.info(`movie credit details successfully stored.`);
             }
             res.status(200).json(credits);
           } catch (err) {
-            console.error(`failed to handle movie credit details data: ${err}`);
+            loglevel.error(`failed to handle movie credit details data: ${err}`);
           }
     } else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});
@@ -35,15 +36,15 @@ router.get('/:id', asyncHandler(async (req, res) => {
         try {
             let personStored = await personModel.findByPersonDBId(id);
             if (personStored) {
-                console.info(`person already stored.`);
+                loglevel.info(`person already stored.`);
             }
             else {
                 personStored = await personModel.create(person);
-                console.info(`person successfully stored.`);
+                loglevel.info(`person successfully stored.`);
             }
             res.status(200).json(personStored);
           } catch (err) {
-            console.error(`failed to handle person data: ${err}`);
+            loglevel.error(`failed to handle person data: ${err}`);
           }
     } else {
         res.status(404).json({message: 'The resource you requested could not be found.', status_code: 404});

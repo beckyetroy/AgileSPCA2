@@ -6,6 +6,7 @@ import movieDetailsModel from "../../../../api/movies/movieDetailsModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
 import { getMovies, getUpcomingMovies, getTrendingMovies, getMovie, getMovieImages } from "../../../../api/tmdb/tmdb-api";
+import loglevel from 'loglevel';
 
 const expect = chai.expect;
 let db;
@@ -27,7 +28,7 @@ describe("Movies endpoint", () => {
     try {
       await db.dropDatabase();
     } catch (error) {
-      console.log(error);
+      loglevel.error(error);
     }
   });
 
@@ -42,7 +43,7 @@ describe("Movies endpoint", () => {
       try {
         await movieModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete discover movie data: ${err}`);
+        loglevel.error(`failed to delete discover movie data: ${err}`);
       }
 
       //Store output from the TMDB API call directly
@@ -93,7 +94,7 @@ describe("Movies endpoint", () => {
       try {
         await upcomingMovieModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete upcoming movie data: ${err}`);
+        loglevel.error(`failed to delete upcoming movie data: ${err}`);
       }
 
       //Store output from the TMDB API call directly
@@ -144,7 +145,7 @@ describe("Movies endpoint", () => {
       try {
         await trendingWeekMovieModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete trending (weekly) movie data: ${err}`);
+        loglevel.error(`failed to delete trending (weekly) movie data: ${err}`);
       }
 
       //Store output from the TMDB API call directly
@@ -195,7 +196,7 @@ describe("Movies endpoint", () => {
       try {
         await trendingDayMovieModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete trending (daily) movie data: ${err}`);
+        loglevel.error(`failed to delete trending (daily) movie data: ${err}`);
       }
 
       //Store output from the TMDB API call directly
@@ -245,7 +246,7 @@ describe("Movies endpoint", () => {
       try {
         await movieDetailsModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete movie details data: ${err}`);
+        loglevel.error(`failed to delete movie details data: ${err}`);
       }
 
       //Store output from the TMDB API call directly
@@ -330,7 +331,7 @@ describe("Movies endpoint", () => {
       try {
         await movieDetailsModel.deleteMany();
       } catch (err) {
-        console.error(`failed to delete movie details data: ${err}`);
+        loglevel.error(`failed to delete movie details data: ${err}`);
       }
 
       //Store output from the TMDB API call directly

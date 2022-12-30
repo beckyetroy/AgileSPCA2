@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 import User from "../../../../api/users/userModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
+import loglevel from 'loglevel';
 
 const expect = chai.expect;
 let db;
@@ -22,7 +23,7 @@ describe("Users endpoint", () => {
     try {
       await db.dropDatabase();
     } catch (error) {
-      console.log(error);
+      loglevel.error(error);
     }
   });
 
@@ -49,7 +50,7 @@ describe("Users endpoint", () => {
         .expect(201)
         .expect({ msg: "Successfully created new user.", code: 201 });
     } catch (err) {
-      console.error(`failed to Load user test Data: ${err}`);
+      loglevel.error(`failed to Load user test Data: ${err}`);
     }
   });
 
@@ -469,7 +470,7 @@ describe("Users endpoint", () => {
                     code: 200
                 });
             } catch (err) {
-              console.error(`failed to update user password: ${err}`);
+              loglevel.error(`failed to update user password: ${err}`);
             }
           });
 
@@ -516,7 +517,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add favourite: ${err}`);
+        loglevel.error(`failed to add favourite: ${err}`);
       }
     });
 
@@ -563,7 +564,21 @@ describe("Users endpoint", () => {
     });
   });
 
-  describe("POST /api/users/:username/favourites  ", () => {
+  describe("POST /api/users/:username/favourites", () => {
+
+    beforeEach(async () => {
+      try {
+        //Add a favourite
+        await request(api)
+          .post("/api/users/testuser1/favourites")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+      } catch (err) {
+        loglevel.error(`failed to add favourite: ${err}`);
+      }
+    });
 
     describe("When movie is not already favourited", () => {
 
@@ -626,7 +641,6 @@ describe("Users endpoint", () => {
         expect(foundMovies.length).to.equal(1);
       });
     });
-  });
 
   describe("POST /api/users/:username/favourites?action=remove", () => {
 
@@ -640,7 +654,7 @@ describe("Users endpoint", () => {
           .expect("Content-Type", /json/)
           .expect(201)
       } catch (err) {
-        console.error(`failed to add favourite: ${err}`);
+        loglevel.error(`failed to add favourite: ${err}`);
       }
     });
 
@@ -737,6 +751,274 @@ describe("Users endpoint", () => {
 
           //Confirm expected favourite is still stored in the DB
           const foundMovies2 = foundUser.favourites.filter((movie) => movie.id === movies[2].id);
+          expect(foundMovies2.length).to.equal(1);
+        });
+      });
+    });
+  });
+  });
+
+  describe("GET /api/users/:username/mustwatch ", () => {
+
+    beforeEach(async () => {
+      try {
+        //Add a must watch
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+      } catch (err) {
+        loglevel.error(`failed to add must watch: ${err}`);
+      }
+    });
+
+    describe("When username is valid", () => {
+
+      it("should return the user's must watch movies and a status 200", async () => {
+        const res = await request(api)
+          .get("/api/users/testuser1/mustwatch")
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(200);
+        expect(res.body).to.be.a("array");
+        const foundMovie = res.body.some((movie) => movie.id === movies[0].id);
+        expect(foundMovie).to.be.true;
+      });
+
+      it("should show the same user must watch movies in the DB", async () => {
+        const res = await request(api)
+          .get("/api/users/testuser1/mustwatch")
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(200);
+
+        //Confirm must watch is stored in the DB
+        const foundUser = await User.findByUserName("testuser1");
+        const foundMovie = foundUser.mustwatch.some((movie) => movie.id === movies[0].id);
+        expect(foundMovie).to.be.true;
+      });
+    });
+
+    describe("When username is invalid", () => {
+
+      it("should return an error message and status 404", async () => {
+        await request(api)
+          .get("/api/users/testuser6/mustwatch")
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(404)
+          .expect({
+            msg: 'Unable to Get User Must Watch List',
+            code: 404
+          });
+      });
+    });
+  });
+
+  describe("POST /api/users/:username/mustwatch", () => {
+
+    beforeEach(async () => {
+      try {
+        //Add a must watch movie
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+      } catch (err) {
+        loglevel.error(`failed to add must watch movie: ${err}`);
+      }
+    });
+
+    describe("When movie is not already added to must watch", () => {
+
+      it("should return the user, including new must watch movie, and a 201 status", async () => {
+        const res = await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[1])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+        expect(res.body.username).to.deep.equal("testuser1");
+        const foundMovie1 = res.body.mustwatch.some((movie) => movie.id === movies[0].id);
+        expect(foundMovie1).to.be.true;
+        const foundMovie2 = res.body.mustwatch.some((movie) => movie.id === movies[1].id);
+        expect(foundMovie2).to.be.true;
+      });
+
+      it("should update the DB", async () => {
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[1])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+
+        //Confirm both must watch movies are stored in the DB
+        const foundUser = await User.findByUserName("testuser1");
+        const foundMovie1 = foundUser.mustwatch.some((movie) => movie.id === movies[0].id);
+        expect(foundMovie1).to.be.true;
+        const foundMovie2 = foundUser.mustwatch.some((movie) => movie.id === movies[1].id);
+        expect(foundMovie2).to.be.true;
+      });
+    });
+
+    describe("When movie is already a must watch movie", () => {
+
+      it("should return the user with no duplicate must watch movies and a 201 status", async () => {
+        const res = await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+        expect(res.body.username).to.deep.equal("testuser1");
+        const foundMovies = res.body.mustwatch.filter((movie) => movie.id === movies[0].id);
+        expect(foundMovies.length).to.equal(1);
+      });
+
+      it("should not update the DB", async () => {
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[1])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+
+        //Confirm must watch movie is only stored once in the DB
+        const foundUser = await User.findByUserName("testuser1");
+        const foundMovies = foundUser.mustwatch.filter((movie) => movie.id === movies[0].id);
+        expect(foundMovies.length).to.equal(1);
+      });
+    });
+  });
+
+  describe("POST /api/users/:username/mustwatch?action=remove", () => {
+
+    beforeEach(async () => {
+      try {
+        //Add a must watch movie
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+      } catch (err) {
+        loglevel.error(`failed to add must watch movie: ${err}`);
+      }
+    });
+
+    beforeEach(async () => {
+      try {
+        //Add an additional must watch movie
+        await request(api)
+          .post("/api/users/testuser1/mustwatch")
+          .send(movies[2])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+      } catch (err) {
+        loglevel.error(`failed to add must watch movie: ${err}`);
+      }
+    });
+
+    describe("When username is invalid", () => {
+
+      it("should return error message and 404 status", async () => {
+        await request(api)
+          .post("/api/users/testuser6/mustwatch?action=remove")
+          .send(movies[0])
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(404)
+          .expect({
+            msg: 'Unable to Remove from Must Watch',
+            code: 404
+          });
+      });
+    });
+
+    describe("When username is valid", () => {
+
+      describe("When movie is not a must watch movie", () => {
+
+        it("should return the user's must watch movies, excluding removed, and a 200 status", async () => {
+          const res = await request(api)
+            .post("/api/users/testuser1/mustwatch?action=remove")
+            .send(movies[1])
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+          
+          //Confirm must watch movie set for removal hasn't been added
+          const foundMovies = res.body.filter((movie) => movie.id === movies[1].id);
+          expect(foundMovies.length).to.equal(0);
+
+          //Confirm it still shows the expected must watch movies
+          const foundMovies2 = res.body.filter((movie) => movie.id === movies[0].id);
+          expect(foundMovies2.length).to.equal(1);
+          const foundMovies3 = res.body.filter((movie) => movie.id === movies[2].id);
+          expect(foundMovies3.length).to.equal(1);
+        });
+
+        it("should not update the DB", async () => {
+          await request(api)
+            .post("/api/users/testuser1/mustwatch?action=remove")
+            .send(movies[1])
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+
+          //Confirm must watch movie set for removal hasn't been added
+          const foundUser = await User.findByUserName("testuser1");
+          const foundMovies = foundUser.mustwatch.filter((movie) => movie.id === movies[1].id);
+          expect(foundMovies.length).to.equal(0);
+
+          //Confirm it still shows the expected must watch movies
+          const foundMovies2 = foundUser.mustwatch.filter((movie) => movie.id === movies[0].id);
+          expect(foundMovies2.length).to.equal(1);
+          const foundMovies3 = foundUser.mustwatch.filter((movie) => movie.id === movies[2].id);
+          expect(foundMovies3.length).to.equal(1);
+        });
+      });
+
+      describe("When movie is a must watch movie", () => {
+
+        it("should return the user must watch movies without the posted must watch movie and a 200 status", async () => {
+          const res = await request(api)
+            .post("/api/users/testuser1/mustwatch?action=remove")
+            .send(movies[0])
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+          //Confirm removed must watch movie isn't returned
+          const foundMovies = res.body.filter((movie) => movie.id === movies[0].id);
+          expect(foundMovies.length).to.equal(0);
+
+          //Confirm it still shows the expected must watch movie
+          const foundMovies2 = res.body.filter((movie) => movie.id === movies[2].id);
+          expect(foundMovies2.length).to.equal(1);
+        });
+
+        it("should update the DB", async () => {
+          await request(api)
+            .post("/api/users/testuser1/mustwatch?action=remove")
+            .send(movies[0])
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
+            .expect(200)
+
+          const foundUser = await User.findByUserName("testuser1");
+          //Confirm removed must watch movie isn't stored in the DB
+          const foundMovies = foundUser.mustwatch.filter((movie) => movie.id === movies[0].id);
+          expect(foundMovies.length).to.equal(0);
+
+          //Confirm expected must watch movie is still stored in the DB
+          const foundMovies2 = foundUser.mustwatch.filter((movie) => movie.id === movies[2].id);
           expect(foundMovies2.length).to.equal(1);
         });
       });

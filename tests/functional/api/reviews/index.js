@@ -5,6 +5,7 @@ import movieDetailsModel from "../../../../api/movies/movieDetailsModel";
 import api from "../../../../index";
 import movies from "../../../../seedData/movies";
 import { getMovieReviews } from "../../../../api/tmdb/tmdb-api";
+import loglevel from 'loglevel';
 
 const expect = chai.expect;
 let db;
@@ -24,7 +25,7 @@ describe("Reviews endpoint", () => {
       try {
         await db.dropDatabase();
       } catch (error) {
-        console.log(error);
+        loglevel.error(error);
       }
     });
 
@@ -38,7 +39,7 @@ describe("Reviews endpoint", () => {
           try {
             await movieDetailsModel.deleteMany();
           } catch (err) {
-            console.error(`failed to delete movie details data: ${err}`);
+            loglevel.error(`failed to delete movie details data: ${err}`);
           }
     
           //Store output from the TMDB API call directly
@@ -139,7 +140,7 @@ describe("Reviews endpoint", () => {
             try {
               await movieDetailsModel.deleteMany();
             } catch (err) {
-              console.error(`failed to delete movie details data: ${err}`);
+              loglevel.error(`failed to delete movie details data: ${err}`);
             }
       
             //Store output from the TMDB API call directly
@@ -213,7 +214,7 @@ describe("Reviews endpoint", () => {
                         .expect(200);
                     expect(res2.body).to.be.a("array");
                 } catch (err) {
-                    console.error(`failed to Load user test Data: ${err}`);
+                    loglevel.error(`failed to Load user test Data: ${err}`);
                 }
             });
       
