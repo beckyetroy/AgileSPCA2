@@ -355,8 +355,7 @@ describe("Movies endpoint", () => {
         await request(api)
           .get(`/api/movies/${movies[0].id}/images`)
           .set("Accept", "application/json");
-      
-        // Confirm movie images pulled from the TMDB API is now in the DB
+
         const foundMovie = await movieDetailsModel.findByMovieDBId(movies[0].id);
         expect(foundMovie).to.be.null;
       });
